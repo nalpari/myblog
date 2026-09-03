@@ -85,10 +85,13 @@
       const rooted = last.b === "main";
       const above = rooted ? nodes.slice(0, -1) : nodes; // commits above the root
       const pitch = above.length > 1 ? Math.max(40, above[above.length - 1].y - above[above.length - 2].y) : 100;
-      // no post on main yet: the trunk rises from a virtual root one row below the list
-      const root = rooted ? last : { li: null, b: "main", x: x0, y: last.y + pitch };
+      // no post on main yet: the trunk rises from a virtual root a row and a half below the list
+      const root = rooted ? last : { li: null, b: "main", x: x0, y: last.y + pitch * 1.5 };
       const mainColor = rooted ? color(last.li) : style.getPropertyValue("--main").trim();
-      const fork = Math.min(150, Math.max(70, root.y - (above.length ? above[above.length - 1].y : 0) + 40));
+      // the fork must be vertical by the time it reaches the first commit above the root,
+      // or that node sits beside the curve instead of on the lane
+      const rootGap = root.y - (above.length ? above[above.length - 1].y : 0);
+      const fork = Math.min(150, Math.max(40, rootGap - 8));
       const span = Math.max(1, root.y);
       const delayOf = (n, i) => 0.15 + ((root.y - n.y) / span) * 0.9 + (i + 1) * 0.06;
 
