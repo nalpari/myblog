@@ -180,6 +180,7 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   height: 100%;
   overflow: visible;
   pointer-events: none;
+  z-index: 1; /* nodes and lanes stay visible over the HEAD/hover band */
 }
 
 .lane {
