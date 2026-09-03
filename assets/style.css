@@ -453,6 +453,9 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 /* long tokens (`<producer>/<version>`) must not widen the table past the viewport */
 .post .body td code { font-size: 14px; overflow-wrap: anywhere; }
 
+/* a table with more columns than the viewport fits scrolls itself, like a code panel */
+.post .body .tscroll { overflow-x: auto; margin: 0 0 28px; }
+.post .body .tscroll table { margin: 0; }
 
 .post .body figure { margin: 0 0 28px; }
 .post .body figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
