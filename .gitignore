@@ -7,3 +7,10 @@
 
 # 로컬 전용 설정
 *.local.json
+
+# Impeccable 작업 산출물 (재생성 가능: 스크린샷, diff, 스캐폴드, 결정 페이지 상태)
+.impeccable/review/
+.impeccable/questions/
+.impeccable/build/scaffold/
+.impeccable/build/comp-grid.png
+.impeccable/mocks/*.webp.png

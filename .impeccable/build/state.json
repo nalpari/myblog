@@ -1,0 +1,477 @@
+{
+  "tool": "build-phase",
+  "version": 2,
+  "startedAt": "2026-09-03T01:57:18.280Z",
+  "comp": ".impeccable/mocks/comp-1-split.webp",
+  "direction": "e76a0f54",
+  "breakpoint": "2752x1536",
+  "artifact": null,
+  "phase": "review",
+  "phases": {
+    "comps": {
+      "status": "closed",
+      "openedAt": "2026-09-03T01:57:18.279Z",
+      "closedAt": "2026-09-03T02:02:09.917Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "3 comps, 1 approved",
+        "approved": ".impeccable/mocks/comp-1-split.webp",
+        "at": "2026-09-03T02:02:09.916Z"
+      },
+      "forced": null
+    },
+    "spec": {
+      "status": "closed",
+      "openedAt": "2026-09-03T02:02:10.257Z",
+      "closedAt": "2026-09-03T02:08:16.259Z",
+      "attempts": 3,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "26 regions, 0 plates, 17 text regions measured",
+        "at": "2026-09-03T02:08:16.259Z"
+      },
+      "forced": null
+    },
+    "plates": {
+      "status": "closed",
+      "openedAt": "2026-09-03T02:08:16.259Z",
+      "closedAt": "2026-09-03T02:08:16.305Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no plates owed",
+        "at": "2026-09-03T02:08:16.305Z"
+      },
+      "forced": null
+    },
+    "hero": {
+      "status": "closed",
+      "openedAt": "2026-09-03T02:08:16.305Z",
+      "closedAt": "2026-09-03T03:09:51.622Z",
+      "attempts": 10,
+      "notes": [],
+      "gate": {
+        "ok": false,
+        "reasons": [
+          "control branch-tags drifts to 52% (structure 52%, color 62%): its chrome differs from the comp's; open .impeccable/review/diff/hero/regions/branch-tags.png and match the border, fill, radius, chevron or arrow, and label size",
+          "control graph-lanes drifts to 62% (structure 53%, color 85%): its chrome differs from the comp's; open .impeccable/review/diff/hero/regions/graph-lanes.png and match the border, fill, radius, chevron or arrow, and label size"
+        ],
+        "summary": "hero 80% (match)",
+        "score": 0.8033,
+        "verdict": "match",
+        "report": ".impeccable/review/diff/hero/report.json",
+        "sideBySide": ".impeccable/review/diff/hero/side-by-side.png",
+        "worst": [
+          "branch-tags drift 52%",
+          "row-6-hash drift 54%",
+          "wordmark drift 58%"
+        ],
+        "worstIds": [
+          "branch-tags",
+          "row-6-hash",
+          "wordmark"
+        ],
+        "worstCrops": [
+          {
+            "id": "branch-tags",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.519,
+              "structure": 0.5171,
+              "color": 0.6234,
+              "colorIntersection": 0.3855,
+              "paletteMatch": 0.7514,
+              "detail": 0.3409,
+              "detailRaw": 0.4347,
+              "detailAdded": 0.1875,
+              "bands": 0.2083
+            },
+            "file": ".impeccable/review/diff/hero/regions/branch-tags.png"
+          },
+          {
+            "id": "row-6-hash",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.5435,
+              "structure": 0.5241,
+              "color": 0.8409,
+              "colorIntersection": 0.7242,
+              "paletteMatch": 0.9037,
+              "detail": 0.3416,
+              "detailRaw": 0.4405,
+              "detailAdded": 0.1979,
+              "bands": 0.2
+            },
+            "file": ".impeccable/review/diff/hero/regions/row-6-hash.png"
+          },
+          {
+            "id": "wordmark",
+            "verdict": "drift",
+            "score": {
+              "overall": 0.5827,
+              "structure": 0.4381,
+              "color": 0.8168,
+              "colorIntersection": 0.6726,
+              "paletteMatch": 0.8945,
+              "detail": 0.5911,
+              "detailRaw": 0.6692,
+              "detailAdded": 0.1563,
+              "bands": 0.7077
+            },
+            "file": ".impeccable/review/diff/hero/regions/wordmark.png"
+          }
+        ],
+        "advisories": [
+          "(advisory, unchanged for 3+ attempts) text row-4-title: letter-spacing is wider than the comp's (gap 0.249 vs 0.145 of the cap height); set letter-spacing to close it by about 4px",
+          "(advisory, unchanged for 3+ attempts) text row-5-title: letter-spacing is wider than the comp's (gap 0.092 vs 0.061 of the cap height); set letter-spacing to close it by about 1px",
+          "(advisory, unchanged for 3+ attempts) text code-lines: 10 lines in the build, 9 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape"
+        ],
+        "regionVerdicts": {
+          "topbar": "match",
+          "wordmark": "drift",
+          "nav": "drift",
+          "branch-tags": "drift",
+          "graph-lanes": "drift",
+          "active-row": "drift",
+          "row-1-title": "drift",
+          "row-1-hash": "drift",
+          "row-2-title": "drift",
+          "row-2-hash": "drift",
+          "row-3-title": "drift",
+          "row-3-hash": "drift",
+          "row-4-title": "drift",
+          "row-4-hash": "drift",
+          "row-5-title": "drift",
+          "row-5-hash": "drift",
+          "row-6-title": "drift",
+          "row-6-hash": "drift",
+          "divider": "drift",
+          "preview-title": "drift",
+          "preview-summary": "drift",
+          "code-panel": "drift",
+          "diff-removed": "drift",
+          "diff-added-1": "drift",
+          "diff-added-2": "contradicted",
+          "code-lines": "drift"
+        },
+        "at": "2026-09-03T03:09:51.620Z"
+      },
+      "forced": {
+        "at": "2026-09-03T03:09:51.622Z",
+        "reason": "user chose \"시안처럼 곡선을 살리기\" on the structured question about the graph-lanes region of the comp; the option the user picked reads \"각 글을 main에 merge된 PR처럼 그려 곡선을 만듭니다. 회색 main 레인이 추가되고 태그 배치가 바뀝니다. 더 화려하지만 시안과 레이아웃이 조금 달라집니다.\" (a main trunk with merge curves instead of the comp lane weave, and the tag row moves), so for the graph-lanes and branch-tags regions the user accepted a layout that differs from the comp and asked to proceed.",
+        "reasons": [
+          "region branch-tags has been the worst region for three attempts and the score moved less than 3 points: value edits are not reaching it. Open .impeccable/review/diff/hero/regions/branch-tags.png and rebuild that region from the comp crop (place its plate, or produce one with generate-image.mjs --plate, or re-derive its structure from the spec box), then recapture.",
+          "control branch-tags drifts to 52% (structure 52%, color 62%): its chrome differs from the comp's; open .impeccable/review/diff/hero/regions/branch-tags.png and match the border, fill, radius, chevron or arrow, and label size",
+          "control graph-lanes drifts to 62% (structure 53%, color 85%): its chrome differs from the comp's; open .impeccable/review/diff/hero/regions/graph-lanes.png and match the border, fill, radius, chevron or arrow, and label size"
+        ]
+      },
+      "readingsSeen": {
+        "text nav: cap height 17.9px in the build, 31px in the comp (-42%); set font-size so the cap height renders at 31px": 1,
+        "text row-3-title: cap height 11.1px in the build, 28.5px in the comp (-61%); set font-size so the cap height renders at 28.5px": 1,
+        "text code-lines: 11 lines in the build, 9 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 3,
+        "text code-lines: the face renders 28% lighter than the comp's (ink density 0.31 vs 0.43); raise a weight step or use the ranked face": 1,
+        "text code-lines: ink is #717e81 in the build, #452728 in the comp; use the comp's colour": 1,
+        "text row-2-title: its first line starts 20px lower than in the comp (38px vs 18px into the region box); the spacing above it is too large": 1,
+        "text row-2-hash: its first line starts 20px lower than in the comp (31px vs 11px into the region box); the spacing above it is too large": 1,
+        "text row-3-title: its first line starts 47px lower than in the comp (66px vs 19px into the region box); the spacing above it is too large": 1,
+        "text row-4-title: letter-spacing is wider than the comp's (gap 0.265 vs 0.145 of the cap height); set letter-spacing to close it by about 4px": 1,
+        "text row-5-title: letter-spacing is wider than the comp's (gap 0.092 vs 0.061 of the cap height); set letter-spacing to close it by about 1px": 9,
+        "text code-lines: ink is #717f81 in the build, #452728 in the comp; use the comp's colour": 1,
+        "text row-4-title: letter-spacing is wider than the comp's (gap 0.249 vs 0.145 of the cap height); set letter-spacing to close it by about 4px": 8,
+        "text code-lines: 10 lines in the build, 9 in the comp; the measure (max-width, font-size, letter-spacing) wraps it differently, so the block is a different shape": 7
+      },
+      "history": [
+        {
+          "at": "2026-09-03T02:20:40.917Z",
+          "score": 0.7961,
+          "worstIds": [
+            "diff-added-1",
+            "diff-removed",
+            "row-6-hash"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "contradicted",
+            "diff-added-1": "contradicted",
+            "diff-added-2": "drift",
+            "code-lines": "drift"
+          },
+          "artifactHash": "469636971466"
+        },
+        {
+          "at": "2026-09-03T02:21:53.634Z",
+          "score": 0.7953,
+          "worstIds": [
+            "diff-added-1",
+            "row-6-hash",
+            "row-5-hash"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "drift",
+            "diff-added-1": "contradicted",
+            "diff-added-2": "contradicted",
+            "code-lines": "drift"
+          },
+          "artifactHash": "5f3ae8d9e22d"
+        },
+        {
+          "at": "2026-09-03T02:22:43.319Z",
+          "score": 0.8167,
+          "worstIds": [
+            "row-6-hash",
+            "row-5-hash",
+            "row-4-hash"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "drift",
+            "diff-added-1": "drift",
+            "diff-added-2": "contradicted",
+            "code-lines": "drift"
+          },
+          "artifactHash": "5f3ae8d9e22d"
+        },
+        {
+          "at": "2026-09-03T02:25:54.569Z",
+          "score": 0.8108,
+          "worstIds": [
+            "branch-tags",
+            "row-6-hash",
+            "wordmark"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "drift",
+            "diff-added-1": "drift",
+            "diff-added-2": "contradicted",
+            "code-lines": "drift"
+          },
+          "artifactHash": "5f3ae8d9e22d"
+        },
+        {
+          "at": "2026-09-03T03:07:08.743Z",
+          "score": 0.8033,
+          "worstIds": [
+            "branch-tags",
+            "row-6-hash",
+            "wordmark"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "drift",
+            "diff-added-1": "drift",
+            "diff-added-2": "contradicted",
+            "code-lines": "drift"
+          },
+          "artifactHash": "5f3ae8d9e22d"
+        },
+        {
+          "at": "2026-09-03T03:09:51.621Z",
+          "score": 0.8033,
+          "worstIds": [
+            "branch-tags",
+            "row-6-hash",
+            "wordmark"
+          ],
+          "regionVerdicts": {
+            "topbar": "match",
+            "wordmark": "drift",
+            "nav": "drift",
+            "branch-tags": "drift",
+            "graph-lanes": "drift",
+            "active-row": "drift",
+            "row-1-title": "drift",
+            "row-1-hash": "drift",
+            "row-2-title": "drift",
+            "row-2-hash": "drift",
+            "row-3-title": "drift",
+            "row-3-hash": "drift",
+            "row-4-title": "drift",
+            "row-4-hash": "drift",
+            "row-5-title": "drift",
+            "row-5-hash": "drift",
+            "row-6-title": "drift",
+            "row-6-hash": "drift",
+            "divider": "drift",
+            "preview-title": "drift",
+            "preview-summary": "drift",
+            "code-panel": "drift",
+            "diff-removed": "drift",
+            "diff-added-1": "drift",
+            "diff-added-2": "contradicted",
+            "code-lines": "drift"
+          },
+          "artifactHash": "5f3ae8d9e22d"
+        }
+      ]
+    },
+    "sections": {
+      "status": "closed",
+      "openedAt": "2026-09-03T03:09:51.622Z",
+      "closedAt": "2026-09-03T03:13:42.974Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-09-03T03:13:42.974Z"
+      },
+      "forced": null
+    },
+    "motion": {
+      "status": "closed",
+      "openedAt": "2026-09-03T03:13:42.974Z",
+      "closedAt": "2026-09-03T03:14:14.478Z",
+      "attempts": 1,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "no mechanical gate",
+        "at": "2026-09-03T03:14:14.477Z"
+      },
+      "forced": null
+    },
+    "responsive": {
+      "status": "closed",
+      "openedAt": "2026-09-03T03:14:14.478Z",
+      "closedAt": "2026-09-03T03:18:37.650Z",
+      "attempts": 4,
+      "notes": [],
+      "gate": {
+        "ok": true,
+        "reasons": [],
+        "summary": "desktop 80% (match)",
+        "score": 0.8035,
+        "sideBySide": ".impeccable/review/diff/desktop/side-by-side.png",
+        "at": "2026-09-03T03:18:37.649Z"
+      },
+      "forced": null
+    },
+    "review": {
+      "status": "open",
+      "openedAt": "2026-09-03T03:18:37.650Z",
+      "closedAt": null,
+      "attempts": 0,
+      "notes": [],
+      "gate": null,
+      "forced": null
+    }
+  },
+  "finish": null,
+  "plates": {}
+}

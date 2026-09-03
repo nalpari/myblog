@@ -1,0 +1,4 @@
+{
+  "prompt": "A desktop web page mockup, browser viewport 1440x900, of a clean Korean personal tech blog named devgrr, light theme, white background. Top nav bar: 'devgrr' wordmark at left in a neutral sans, links '글', '태그', '소개' at right. Below, a page heading '최근 글' and a vertical list of article cards: each card has a small rectangular thumbnail at left, a bold Korean title, a two-line gray Korean excerpt, a date like '2026-09-03', and small blue tag chips such as 'React', 'Spring', 'Docker'. Titles: 'React 렌더링은 언제 일어나는가', 'Spring 트랜잭션 전파', 'Docker 이미지 다이어트', '해시테이블 직접 만들기'. Right sidebar with a small author box 'devgrr' and a category list '프론트엔드, 백엔드, 인프라, CS 기초'. Blue link accent, light gray hairline dividers, generous whitespace, Pretendard-style Korean sans. Looks like velog or Medium. Crisp UI rendering, no people.",
+  "createdAt": "2026-09-03T01:46:47.909Z"
+}
