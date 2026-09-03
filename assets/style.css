@@ -454,6 +454,9 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 .post .body figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
 .post .body figcaption { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--fg-3); }
 
+.post .cover { margin: 0 0 44px; }
+.post .cover img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+
 /* the senior's note: a review comment on the commit */
 .review {
   margin: 32px 0;
