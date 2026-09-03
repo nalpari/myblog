@@ -1,0 +1,729 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-03T03:29:02.795Z",
+  "title": "Design System: devgrr",
+  "extensions": {
+    "themes": {
+      "default": "dark",
+      "mechanism": ":root holds dark; @media (prefers-color-scheme: light) overrides every token; color-scheme: dark light. colorMeta.<token>.light carries the light value."
+    },
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#12151b",
+        "light": "#f7f8fa",
+        "purpose": "html and body.",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 264.2)",
+          "oklch(26.4% 0.013 264.2)",
+          "oklch(37.9% 0.013 264.2)",
+          "oklch(49.3% 0.013 264.2)",
+          "oklch(60.7% 0.013 264.2)",
+          "oklch(72.1% 0.013 264.2)",
+          "oklch(83.6% 0.013 264.2)",
+          "oklch(95.0% 0.013 264.2)"
+        ]
+      },
+      "bg-2": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "canonical": "#191c23",
+        "light": "#ffffff",
+        "purpose": "Code panels, review notes, the resume button.",
+        "tonalRamp": [
+          "oklch(15.0% 0.014 266.9)",
+          "oklch(26.4% 0.014 266.9)",
+          "oklch(37.9% 0.014 266.9)",
+          "oklch(49.3% 0.014 266.9)",
+          "oklch(60.7% 0.014 266.9)",
+          "oklch(72.1% 0.014 266.9)",
+          "oklch(83.6% 0.014 266.9)",
+          "oklch(95.0% 0.014 266.9)"
+        ]
+      },
+      "bg-band": {
+        "role": "neutral",
+        "displayName": "Band",
+        "canonical": "#1c212d",
+        "light": "#e9ecf1",
+        "purpose": "HEAD row, hovered rows, inline code.",
+        "tonalRamp": [
+          "oklch(15.0% 0.024 267.0)",
+          "oklch(26.4% 0.024 267.0)",
+          "oklch(37.9% 0.024 267.0)",
+          "oklch(49.3% 0.024 267.0)",
+          "oklch(60.7% 0.024 267.0)",
+          "oklch(72.1% 0.024 267.0)",
+          "oklch(83.6% 0.024 267.0)",
+          "oklch(95.0% 0.024 267.0)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#2a2f37",
+        "light": "#dfe3e8",
+        "purpose": "Every 1px border.",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 259.8)",
+          "oklch(26.4% 0.016 259.8)",
+          "oklch(37.9% 0.016 259.8)",
+          "oklch(49.3% 0.016 259.8)",
+          "oklch(60.7% 0.016 259.8)",
+          "oklch(72.1% 0.016 259.8)",
+          "oklch(83.6% 0.016 259.8)",
+          "oklch(95.0% 0.016 259.8)"
+        ]
+      },
+      "line-2": {
+        "role": "neutral",
+        "displayName": "Hairline strong",
+        "canonical": "#3a4049",
+        "light": "#c9ced6",
+        "purpose": "Resume button border, code scrollbar thumb.",
+        "tonalRamp": [
+          "oklch(15.0% 0.017 258.4)",
+          "oklch(26.4% 0.017 258.4)",
+          "oklch(37.9% 0.017 258.4)",
+          "oklch(49.3% 0.017 258.4)",
+          "oklch(60.7% 0.017 258.4)",
+          "oklch(72.1% 0.017 258.4)",
+          "oklch(83.6% 0.017 258.4)",
+          "oklch(95.0% 0.017 258.4)"
+        ]
+      },
+      "fg": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#dfe3e9",
+        "light": "#16191d",
+        "purpose": "Headings, titles, body.",
+        "tonalRamp": [
+          "oklch(15.0% 0.009 258.3)",
+          "oklch(26.4% 0.009 258.3)",
+          "oklch(37.9% 0.009 258.3)",
+          "oklch(49.3% 0.009 258.3)",
+          "oklch(60.7% 0.009 258.3)",
+          "oklch(72.1% 0.009 258.3)",
+          "oklch(83.6% 0.009 258.3)",
+          "oklch(95.0% 0.009 258.3)"
+        ]
+      },
+      "fg-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#b6bbc4",
+        "light": "#4b5260",
+        "purpose": "Ledes, summaries, review text, back link.",
+        "tonalRamp": [
+          "oklch(15.0% 0.014 262.4)",
+          "oklch(26.4% 0.014 262.4)",
+          "oklch(37.9% 0.014 262.4)",
+          "oklch(49.3% 0.014 262.4)",
+          "oklch(60.7% 0.014 262.4)",
+          "oklch(72.1% 0.014 262.4)",
+          "oklch(83.6% 0.014 262.4)",
+          "oklch(95.0% 0.014 262.4)"
+        ]
+      },
+      "fg-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#7b808a",
+        "light": "#6f7681",
+        "purpose": "Hashes, nav at rest, meta, line numbers, TOC at rest.",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 264.4)",
+          "oklch(26.4% 0.016 264.4)",
+          "oklch(37.9% 0.016 264.4)",
+          "oklch(49.3% 0.016 264.4)",
+          "oklch(60.7% 0.016 264.4)",
+          "oklch(72.1% 0.016 264.4)",
+          "oklch(83.6% 0.016 264.4)",
+          "oklch(95.0% 0.016 264.4)"
+        ]
+      },
+      "frontend": {
+        "role": "secondary",
+        "displayName": "Frontend Green",
+        "canonical": "#46c26f",
+        "light": "#1f9d55",
+        "purpose": "The frontend lane, pill, and nodes.",
+        "tonalRamp": [
+          "oklch(15.0% 0.162 151.0)",
+          "oklch(26.4% 0.162 151.0)",
+          "oklch(37.9% 0.162 151.0)",
+          "oklch(49.3% 0.162 151.0)",
+          "oklch(60.7% 0.162 151.0)",
+          "oklch(72.1% 0.162 151.0)",
+          "oklch(83.6% 0.162 151.0)",
+          "oklch(95.0% 0.162 151.0)"
+        ]
+      },
+      "backend": {
+        "role": "primary",
+        "displayName": "Backend Blue",
+        "canonical": "#5ba4ff",
+        "light": "#2f6fe0",
+        "purpose": "The backend lane; also focus ring, selection, body links, review head tint.",
+        "tonalRamp": [
+          "oklch(15.0% 0.153 255.0)",
+          "oklch(26.4% 0.153 255.0)",
+          "oklch(37.9% 0.153 255.0)",
+          "oklch(49.3% 0.153 255.0)",
+          "oklch(60.7% 0.153 255.0)",
+          "oklch(72.1% 0.153 255.0)",
+          "oklch(83.6% 0.153 255.0)",
+          "oklch(95.0% 0.153 255.0)"
+        ]
+      },
+      "infra": {
+        "role": "secondary",
+        "displayName": "Infra Pink",
+        "canonical": "#f472b6",
+        "light": "#d63f8a",
+        "purpose": "The infra lane.",
+        "tonalRamp": [
+          "oklch(15.0% 0.175 349.8)",
+          "oklch(26.4% 0.175 349.8)",
+          "oklch(37.9% 0.175 349.8)",
+          "oklch(49.3% 0.175 349.8)",
+          "oklch(60.7% 0.175 349.8)",
+          "oklch(72.1% 0.175 349.8)",
+          "oklch(83.6% 0.175 349.8)",
+          "oklch(95.0% 0.175 349.8)"
+        ]
+      },
+      "cs": {
+        "role": "secondary",
+        "displayName": "CS Amber",
+        "canonical": "#e2a33a",
+        "light": "#b7791f",
+        "purpose": "The cs lane.",
+        "tonalRamp": [
+          "oklch(15.0% 0.138 76.1)",
+          "oklch(26.4% 0.138 76.1)",
+          "oklch(37.9% 0.138 76.1)",
+          "oklch(49.3% 0.138 76.1)",
+          "oklch(60.7% 0.138 76.1)",
+          "oklch(72.1% 0.138 76.1)",
+          "oklch(83.6% 0.138 76.1)",
+          "oklch(95.0% 0.138 76.1)"
+        ]
+      },
+      "main": {
+        "role": "secondary",
+        "displayName": "Main Grey",
+        "canonical": "#8b909a",
+        "light": "#6f7681",
+        "purpose": "The trunk, merge nodes, the root commit.",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 264.5)",
+          "oklch(26.4% 0.016 264.5)",
+          "oklch(37.9% 0.016 264.5)",
+          "oklch(49.3% 0.016 264.5)",
+          "oklch(60.7% 0.016 264.5)",
+          "oklch(72.1% 0.016 264.5)",
+          "oklch(83.6% 0.016 264.5)",
+          "oklch(95.0% 0.016 264.5)"
+        ]
+      },
+      "add": {
+        "role": "tertiary",
+        "displayName": "Add gutter",
+        "canonical": "rgba(62, 190, 110, 0.22)",
+        "light": "rgba(31, 157, 85, 0.12)",
+        "purpose": "Row tint behind + lines.",
+        "tonalRamp": [
+          "oklch(15.0% 0.161 152.1)",
+          "oklch(26.4% 0.161 152.1)",
+          "oklch(37.9% 0.161 152.1)",
+          "oklch(49.3% 0.161 152.1)",
+          "oklch(60.7% 0.161 152.1)",
+          "oklch(72.1% 0.161 152.1)",
+          "oklch(83.6% 0.161 152.1)",
+          "oklch(95.0% 0.161 152.1)"
+        ]
+      },
+      "del": {
+        "role": "tertiary",
+        "displayName": "Del gutter",
+        "canonical": "rgba(255, 90, 90, 0.18)",
+        "light": "rgba(220, 38, 38, 0.10)",
+        "purpose": "Row tint behind - lines.",
+        "tonalRamp": [
+          "oklch(15.0% 0.201 24.1)",
+          "oklch(26.4% 0.201 24.1)",
+          "oklch(37.9% 0.201 24.1)",
+          "oklch(49.3% 0.201 24.1)",
+          "oklch(60.7% 0.201 24.1)",
+          "oklch(72.1% 0.201 24.1)",
+          "oklch(83.6% 0.201 24.1)",
+          "oklch(95.0% 0.201 24.1)"
+        ]
+      },
+      "add-ink": {
+        "role": "tertiary",
+        "displayName": "Add ink",
+        "canonical": "#5ad48a",
+        "light": "#1f9d55",
+        "purpose": "The + mark; 55% into fg for added code text.",
+        "tonalRamp": [
+          "oklch(15.0% 0.153 154.0)",
+          "oklch(26.4% 0.153 154.0)",
+          "oklch(37.9% 0.153 154.0)",
+          "oklch(49.3% 0.153 154.0)",
+          "oklch(60.7% 0.153 154.0)",
+          "oklch(72.1% 0.153 154.0)",
+          "oklch(83.6% 0.153 154.0)",
+          "oklch(95.0% 0.153 154.0)"
+        ]
+      },
+      "del-ink": {
+        "role": "tertiary",
+        "displayName": "Del ink",
+        "canonical": "#ff8080",
+        "light": "#d33c3c",
+        "purpose": "The - mark.",
+        "tonalRamp": [
+          "oklch(15.0% 0.155 21.5)",
+          "oklch(26.4% 0.155 21.5)",
+          "oklch(37.9% 0.155 21.5)",
+          "oklch(49.3% 0.155 21.5)",
+          "oklch(60.7% 0.155 21.5)",
+          "oklch(72.1% 0.155 21.5)",
+          "oklch(83.6% 0.155 21.5)",
+          "oklch(95.0% 0.155 21.5)"
+        ]
+      },
+      "syn-keyword": {
+        "role": "tertiary",
+        "displayName": "Syntax keyword",
+        "canonical": "#ff7b9c",
+        "light": "#c5306a",
+        "purpose": "hljs keyword, selector-tag, literal, built_in.",
+        "tonalRamp": [
+          "oklch(15.0% 0.163 6.1)",
+          "oklch(26.4% 0.163 6.1)",
+          "oklch(37.9% 0.163 6.1)",
+          "oklch(49.3% 0.163 6.1)",
+          "oklch(60.7% 0.163 6.1)",
+          "oklch(72.1% 0.163 6.1)",
+          "oklch(83.6% 0.163 6.1)",
+          "oklch(95.0% 0.163 6.1)"
+        ]
+      },
+      "syn-meta": {
+        "role": "tertiary",
+        "displayName": "Syntax meta",
+        "canonical": "#e2c05a",
+        "light": "#9a6b00",
+        "purpose": "hljs meta, attr, attribute.",
+        "tonalRamp": [
+          "oklch(15.0% 0.127 90.9)",
+          "oklch(26.4% 0.127 90.9)",
+          "oklch(37.9% 0.127 90.9)",
+          "oklch(49.3% 0.127 90.9)",
+          "oklch(60.7% 0.127 90.9)",
+          "oklch(72.1% 0.127 90.9)",
+          "oklch(83.6% 0.127 90.9)",
+          "oklch(95.0% 0.127 90.9)"
+        ]
+      },
+      "syn-title": {
+        "role": "tertiary",
+        "displayName": "Syntax title",
+        "canonical": "#79b8ff",
+        "light": "#1f5fd1",
+        "purpose": "hljs title, function_, class_, section, name.",
+        "tonalRamp": [
+          "oklch(15.0% 0.121 252.3)",
+          "oklch(26.4% 0.121 252.3)",
+          "oklch(37.9% 0.121 252.3)",
+          "oklch(49.3% 0.121 252.3)",
+          "oklch(60.7% 0.121 252.3)",
+          "oklch(72.1% 0.121 252.3)",
+          "oklch(83.6% 0.121 252.3)",
+          "oklch(95.0% 0.121 252.3)"
+        ]
+      },
+      "syn-string": {
+        "role": "tertiary",
+        "displayName": "Syntax string",
+        "canonical": "#a5d6ff",
+        "light": "#1a6fb5",
+        "purpose": "hljs string, regexp, addition.",
+        "tonalRamp": [
+          "oklch(15.0% 0.077 244.1)",
+          "oklch(26.4% 0.077 244.1)",
+          "oklch(37.9% 0.077 244.1)",
+          "oklch(49.3% 0.077 244.1)",
+          "oklch(60.7% 0.077 244.1)",
+          "oklch(72.1% 0.077 244.1)",
+          "oklch(83.6% 0.077 244.1)",
+          "oklch(95.0% 0.077 244.1)"
+        ]
+      },
+      "syn-comment": {
+        "role": "tertiary",
+        "displayName": "Syntax comment",
+        "canonical": "#7b808a",
+        "light": "#6f7681",
+        "purpose": "hljs comment, quote, deletion; italic.",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 264.4)",
+          "oklch(26.4% 0.016 264.4)",
+          "oklch(37.9% 0.016 264.4)",
+          "oklch(49.3% 0.016 264.4)",
+          "oklch(60.7% 0.016 264.4)",
+          "oklch(72.1% 0.016 264.4)",
+          "oklch(83.6% 0.016 264.4)",
+          "oklch(95.0% 0.016 264.4)"
+        ]
+      },
+      "syn-number": {
+        "role": "tertiary",
+        "displayName": "Syntax number",
+        "canonical": "#e6a23c",
+        "light": "#b45309",
+        "purpose": "hljs number, symbol, bullet, variable.",
+        "tonalRamp": [
+          "oklch(15.0% 0.139 73.3)",
+          "oklch(26.4% 0.139 73.3)",
+          "oklch(37.9% 0.139 73.3)",
+          "oklch(49.3% 0.139 73.3)",
+          "oklch(60.7% 0.139 73.3)",
+          "oklch(72.1% 0.139 73.3)",
+          "oklch(83.6% 0.139 73.3)",
+          "oklch(95.0% 0.139 73.3)"
+        ]
+      },
+      "syn-type": {
+        "role": "tertiary",
+        "displayName": "Syntax type",
+        "canonical": "#ffab70",
+        "light": "#b2501f",
+        "purpose": "hljs type, params.",
+        "tonalRamp": [
+          "oklch(15.0% 0.124 55.1)",
+          "oklch(26.4% 0.124 55.1)",
+          "oklch(37.9% 0.124 55.1)",
+          "oklch(49.3% 0.124 55.1)",
+          "oklch(60.7% 0.124 55.1)",
+          "oklch(72.1% 0.124 55.1)",
+          "oklch(83.6% 0.124 55.1)",
+          "oklch(95.0% 0.124 55.1)"
+        ]
+      },
+      "pill-ink": {
+        "role": "neutral",
+        "displayName": "Pill ink",
+        "canonical": "#ffffff",
+        "light": "#16191d",
+        "purpose": "Light end of the branch-tag text mix.",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 0.0)",
+          "oklch(26.4% 0.000 0.0)",
+          "oklch(37.9% 0.000 0.0)",
+          "oklch(49.3% 0.000 0.0)",
+          "oklch(60.7% 0.000 0.0)",
+          "oklch(72.1% 0.000 0.0)",
+          "oklch(83.6% 0.000 0.0)",
+          "oklch(95.0% 0.000 0.0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Lowercase \"devgrr\" in the top bar; 24px under 960px."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "Post h1, balanced; 30px under 960px. Sibling: home preview title 35px/40px."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Post h2; feeds the TOC. 56px above, 18px below. 22px under 960px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Commit row titles, one line with ellipsis; post h3 at 600."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Post opening paragraph in fg-2. Sibling: preview summary 17.5px/24.5px, max 62ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Post body, 22px paragraph gap; home base 17px/1.6; 16.5px under 960px."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Ref line, footer, back link (15.5px), tables (16px)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Lowercase branch pills; 12.5px on the post branch chip."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Code panels; 14px/20px on mobile; filename tab 13px; inline code 0.9em."
+      },
+      "hash": {
+        "displayName": "Hash",
+        "purpose": "Seven-character FNV-1a hash beside each row title; 15px on the ref line."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-control",
+        "value": "0 8px 24px -8px rgba(0, 0, 0, 0.45)",
+        "purpose": "Only under a position: fixed element over content (the resume button). Nothing in flow carries a shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The single easing (--ease) for every transition and keyframe."
+      },
+      {
+        "name": "state-fast",
+        "value": "0.2s",
+        "purpose": "Color and background on nav links, TOC links, branch tags, underline color."
+      },
+      {
+        "name": "state",
+        "value": "0.25s",
+        "purpose": "Row background on hover/HEAD; node transform."
+      },
+      {
+        "name": "state-slow",
+        "value": "0.3s",
+        "purpose": "Opacity of lanes, nodes, and rows when a branch filter is pressed."
+      },
+      {
+        "name": "draw",
+        "value": "1.1s",
+        "purpose": "Lanes draw from the root via stroke-dashoffset (pathLength 1)."
+      },
+      {
+        "name": "pop",
+        "value": "0.45s",
+        "purpose": "Nodes scale from 0 to 1."
+      },
+      {
+        "name": "rise",
+        "value": "0.5s",
+        "purpose": "Rows fade in and rise 6px."
+      },
+      {
+        "name": "fade",
+        "value": "0.6s at 0.9s",
+        "purpose": "The preview pane fades in after the log."
+      },
+      {
+        "name": "stagger",
+        "value": "0.15s + 0.9s x (distance from root / graph height) + 0.06s x lane index",
+        "purpose": "Per-row delay (--d); lanes get 0.08s x index; merge arcs +0.12s, merge nodes +0.32s after their row."
+      },
+      {
+        "name": "sequence-end",
+        "value": "2600ms",
+        "purpose": "The is-drawn class is removed; afterwards only state transitions run."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "No keyframes at all; layout runs once fonts are ready; resume scroll is instant."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "480px",
+        "purpose": "At or below: pills and rows shift 96px; pill gap 4px; resume button inset 14px."
+      },
+      {
+        "name": "tablet",
+        "value": "960px",
+        "purpose": "At or below: one column, preview removed, row summaries shown, lanes packed at an 18px gap, top bar 64px."
+      },
+      {
+        "name": "home-zoom",
+        "value": "961px",
+        "purpose": "At or above: .home zoom clamp(0.93, 100vw / 1376px, 1.16); the comp rhythm holds from 1280 to 1600."
+      },
+      {
+        "name": "toc",
+        "value": "1199px",
+        "purpose": "At or below: TOC rail hidden; post is a single 70ch column."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Branch tags",
+      "kind": "chip",
+      "refersTo": "branch-tag",
+      "description": "Pill buttons under the top bar, one per topic lane; pressing one filters the log. Lanes are positioned under these pills.",
+      "html": "<ul class=\"ds-branches\"><li><button type=\"button\" class=\"ds-branch-tag\" data-branch=\"frontend\" aria-pressed=\"false\">frontend</button></li><li><button type=\"button\" class=\"ds-branch-tag\" data-branch=\"backend\" aria-pressed=\"true\">backend</button></li><li><button type=\"button\" class=\"ds-branch-tag\" data-branch=\"infra\" aria-pressed=\"false\">infra</button></li><li><button type=\"button\" class=\"ds-branch-tag\" data-branch=\"cs\" aria-pressed=\"false\">cs</button></li></ul>",
+      "css": ".ds-branches{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}.ds-branch-tag[data-branch=\"frontend\"]{--c:var(--frontend,#46c26f)}.ds-branch-tag[data-branch=\"backend\"]{--c:var(--backend,#5ba4ff)}.ds-branch-tag[data-branch=\"infra\"]{--c:var(--infra,#f472b6)}.ds-branch-tag[data-branch=\"cs\"]{--c:var(--cs,#e2a33a)}.ds-branch-tag[data-branch=\"main\"]{--c:var(--main,#8b909a)}.ds-branch-tag{height:27px;min-width:32px;padding:0 6px;border:1.5px solid color-mix(in srgb,var(--c) 80%,var(--bg,#12151b));border-radius:999px;background:color-mix(in srgb,var(--c) 30%,var(--bg,#12151b));color:color-mix(in srgb,var(--c) 78%,var(--pill-ink,#fff));font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;cursor:pointer;transition:background .2s cubic-bezier(0.16,1,0.3,1),color .2s cubic-bezier(0.16,1,0.3,1)}.ds-branch-tag:hover{background:color-mix(in srgb,var(--c) 22%,transparent)}.ds-branch-tag[aria-pressed=\"true\"]{background:var(--c);color:var(--bg,#12151b)}.ds-branch-tag:active{transform:translateY(1px)}.ds-branch-tag:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px;border-radius:999px}"
+    },
+    {
+      "name": "Commit rows",
+      "kind": "nav",
+      "refersTo": "commit-row",
+      "description": "One row per post: title, hash, node. On the site the node is SVG in a 239px reserved gutter; this snippet stands the node in with a pseudo-element.",
+      "html": "<ol class=\"ds-commits\" reversed><li data-branch=\"frontend\"><a href=\"#\"><span class=\"ds-title\">React 렌더링은 언제 일어나는가</span><span class=\"ds-hash\">3743ade</span></a></li><li data-branch=\"backend\" class=\"is-head\"><a href=\"#\"><span class=\"ds-title\">Spring 트랜잭션 전파</span><span class=\"ds-hash\">adaf65f</span></a></li><li data-branch=\"infra\"><a href=\"#\"><span class=\"ds-title\">Docker 이미지 다이어트</span><span class=\"ds-hash\">ebb6fd5</span></a></li></ol>",
+      "css": ".ds-commits{list-style:none;margin:0;padding:0 8px 0 3px;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;color:var(--fg,#dfe3e9)}.ds-commits li[data-branch=\"frontend\"]{--c:var(--frontend,#46c26f)}.ds-commits li[data-branch=\"backend\"]{--c:var(--backend,#5ba4ff)}.ds-commits li[data-branch=\"infra\"]{--c:var(--infra,#f472b6)}.ds-commits li[data-branch=\"cs\"]{--c:var(--cs,#e2a33a)}.ds-commits li[data-branch=\"main\"]{--c:var(--main,#8b909a)}.ds-commits li{position:relative;height:100px;padding-top:13px}.ds-commits a{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;height:74px;padding:0 14px 0 60px;border-radius:8px;color:inherit;text-decoration:none;transition:background .25s cubic-bezier(0.16,1,0.3,1)}.ds-commits a::before{content:\"\";position:absolute;left:14px;top:50%;width:14px;height:14px;margin-top:-10px;border-radius:50%;background:var(--c);border:3px solid var(--bg,#12151b);transition:transform .25s cubic-bezier(0.16,1,0.3,1)}.ds-commits li.is-head>a,.ds-commits li:hover>a{background:var(--bg-band,#1c212d)}.ds-commits li.is-head>a::before,.ds-commits a:hover::before{transform:scale(1.3)}.ds-commits .ds-title{font-size:20px;font-weight:500;line-height:1.3;letter-spacing:-.015em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.ds-commits .ds-hash{font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-size:17px;color:var(--fg-3,#7b808a);flex:none;transition:color .25s cubic-bezier(0.16,1,0.3,1)}.ds-commits a:hover .ds-hash{color:var(--fg-2,#b6bbc4)}.ds-commits a:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px;border-radius:8px}"
+    },
+    {
+      "name": "Ref line with branch chip",
+      "kind": "chip",
+      "refersTo": "branch-chip",
+      "description": "The first line of a post: branch chip (links to the home filtered by branch), generated hash, date.",
+      "html": "<p class=\"ds-ref\"><a class=\"ds-branch\" data-branch=\"backend\" href=\"#\">backend</a><span class=\"ds-hash\">adaf65f</span><time datetime=\"2026-08-28\">2026-08-28</time></p>",
+      "css": ".ds-ref{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:0;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:15px;line-height:1.6;color:var(--fg-3,#7b808a)}.ds-ref .ds-branch[data-branch=\"frontend\"]{--c:var(--frontend,#46c26f)}.ds-ref .ds-branch[data-branch=\"backend\"]{--c:var(--backend,#5ba4ff)}.ds-ref .ds-branch[data-branch=\"infra\"]{--c:var(--infra,#f472b6)}.ds-ref .ds-branch[data-branch=\"cs\"]{--c:var(--cs,#e2a33a)}.ds-ref .ds-branch[data-branch=\"main\"]{--c:var(--main,#8b909a)}.ds-ref .ds-branch{display:inline-flex;align-items:center;height:26px;padding:0 9px;border:1px solid color-mix(in srgb,var(--c) 70%,transparent);border-radius:999px;background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);font-size:12.5px;font-weight:500;text-decoration:none}.ds-ref .ds-branch:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px;border-radius:999px}.ds-ref .ds-hash{font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-size:15px}.ds-ref time{font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Code panel (diff with filename)",
+      "kind": "card",
+      "refersTo": "code-panel",
+      "description": "Every snippet on the site. Lines are a number / mark / content grid; diff rows carry add and del tints; the filename tab is a pseudo-element.",
+      "html": "<pre class=\"ds-code ds-diff\" data-file=\"OrderService.java\"><code><span class=\"ds-ln ds-hunk\"><span class=\"ds-n\">1</span><span class=\"ds-m\"> </span><span class=\"ds-c\">@@ -10,7 +10,7 @@</span></span><span class=\"ds-ln ds-ctx\"><span class=\"ds-n\">2</span><span class=\"ds-m\"> </span><span class=\"ds-c\">    <span class=\"ds-syn-meta\">@Transactional</span>(propagation = Propagation.REQUIRED)</span></span><span class=\"ds-ln ds-ctx\"><span class=\"ds-n\">3</span><span class=\"ds-m\"> </span><span class=\"ds-c\">    <span class=\"ds-syn-keyword\">public</span> <span class=\"ds-syn-keyword\">void</span> <span class=\"ds-syn-title\">createOrder</span>(<span class=\"ds-syn-type\">Order</span> order) {</span></span><span class=\"ds-ln ds-del\"><span class=\"ds-n\">4</span><span class=\"ds-m\">-</span><span class=\"ds-c\">        paymentLog.record(order);</span></span><span class=\"ds-ln ds-add\"><span class=\"ds-n\">5</span><span class=\"ds-m\">+</span><span class=\"ds-c\">        paymentService.processPayment(order);</span></span><span class=\"ds-ln ds-add\"><span class=\"ds-n\">6</span><span class=\"ds-m\">+</span><span class=\"ds-c\">        <span class=\"ds-syn-comment\">// 결제 로그는 실패해도 주문을 롤백하면 안 된다</span></span></span><span class=\"ds-ln ds-add\"><span class=\"ds-n\">7</span><span class=\"ds-m\">+</span><span class=\"ds-c\">        log.warn(<span class=\"ds-syn-string\">\"payment log failed: {}\"</span>, e.getMessage());</span></span><span class=\"ds-ln ds-ctx\"><span class=\"ds-n\">8</span><span class=\"ds-m\"> </span><span class=\"ds-c\">    }</span></span></code></pre>",
+      "css": ".ds-code{position:relative;margin:0;padding:44px 12px 24px;border:1px solid var(--line,#2a2f37);border-radius:10px;background:var(--bg-2,#191c23);color:var(--fg,#dfe3e9);font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-size:14.5px;font-weight:500;line-height:20.5px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--line-2,#3a4049) transparent;tab-size:4}.ds-code::before{content:attr(data-file);position:absolute;top:0;left:0;right:0;height:32px;padding:0 14px;border-bottom:1px solid var(--line,#2a2f37);font-size:13px;line-height:32px;color:var(--fg-3,#7b808a);background:color-mix(in srgb,var(--bg,#12151b) 40%,var(--bg-2,#191c23));border-radius:10px 10px 0 0}.ds-code code{display:block;min-width:max-content}.ds-ln{display:grid;grid-template-columns:30px 28px 1fr;margin:0 -12px;padding:0 12px}.ds-n{text-align:right;padding-right:12px;color:var(--fg-3,#7b808a);user-select:none}.ds-m{color:var(--fg-3,#7b808a);user-select:none}.ds-add{background:var(--add,rgba(62,190,110,.22))}.ds-add .ds-m{color:var(--add-ink,#5ad48a)}.ds-add .ds-c{color:color-mix(in srgb,var(--add-ink,#5ad48a) 55%,var(--fg,#dfe3e9))}.ds-del{background:var(--del,rgba(255,90,90,.18))}.ds-del .ds-m{color:var(--del-ink,#ff8080)}.ds-hunk .ds-c{color:var(--fg-3,#7b808a)}.ds-syn-keyword{color:var(--syn-keyword,#ff7b9c)}.ds-syn-meta{color:var(--syn-meta,#e2c05a)}.ds-syn-title{color:var(--syn-title,#79b8ff)}.ds-syn-string{color:var(--syn-string,#a5d6ff)}.ds-syn-comment{color:var(--syn-comment,#7b808a);font-style:italic}.ds-syn-number{color:var(--syn-number,#e6a23c)}.ds-syn-type{color:var(--syn-type,#ffab70)}"
+    },
+    {
+      "name": "Body prose with inline code and link",
+      "kind": "custom",
+      "refersTo": "inline-code",
+      "description": "Post body text: 17.5px/1.75, inline code on a bg-band chip, links in backend blue with a half-strength underline.",
+      "html": "<p class=\"ds-prose\">기본값은 <code class=\"ds-inline\">REQUIRED</code>이고, 실무에서 진짜 쓰는 것은 <code class=\"ds-inline\">REQUIRED</code>와 <code class=\"ds-inline\">REQUIRES_NEW</code> 두 개입니다. <a class=\"ds-link\" href=\"#\">전파 속성 문서</a>를 같이 보세요.</p>",
+      "css": ".ds-prose{margin:0;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:17.5px;line-height:1.75;color:var(--fg,#dfe3e9)}.ds-prose .ds-inline{padding:2px 6px;border-radius:5px;background:var(--bg-band,#1c212d);font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-size:.9em}.ds-link{color:var(--backend,#5ba4ff);text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--backend,#5ba4ff) 50%,transparent);transition:text-decoration-color .2s cubic-bezier(0.16,1,0.3,1)}.ds-link:hover{text-decoration-color:var(--backend,#5ba4ff)}.ds-link:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Review note",
+      "kind": "card",
+      "refersTo": "review-note",
+      "description": "The senior's comment on the commit: a hairlined 10px panel with a blue-tinted header naming the author and a mono location.",
+      "html": "<aside class=\"ds-review\"><p class=\"ds-review-head\"><b>devgrr</b> 리뷰 코멘트 <span class=\"ds-hash\">OrderService.java:16</span></p><p><code class=\"ds-inline\">try/catch</code>로 감싸지 않으면 <code class=\"ds-inline\">REQUIRES_NEW</code>를 붙여도 소용없습니다. 전파 속성은 트랜잭션의 경계만 정하지, 예외를 대신 잡아 주지 않습니다.</p></aside>",
+      "css": ".ds-review{margin:0;border:1px solid var(--line,#2a2f37);border-radius:10px;overflow:hidden;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:17.5px;line-height:1.75;color:var(--fg,#dfe3e9)}.ds-review-head{display:flex;align-items:center;gap:10px;margin:0;padding:10px 16px;border-bottom:1px solid var(--line,#2a2f37);background:color-mix(in srgb,var(--backend,#5ba4ff) 10%,var(--bg-2,#191c23));font-size:14px;line-height:1.6;color:var(--fg-2,#b6bbc4)}.ds-review-head b{font-weight:600;color:var(--fg,#dfe3e9)}.ds-review-head .ds-hash{font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;color:var(--fg-3,#7b808a)}.ds-review>p:not(.ds-review-head){margin:0;padding:16px 16px 18px;background:var(--bg-2,#191c23)}.ds-review>p:not(.ds-review-head)+p{padding-top:0}.ds-review .ds-inline{padding:2px 6px;border-radius:5px;background:var(--bg-band,#1c212d);font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-size:.9em}"
+    },
+    {
+      "name": "Top bar",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Mono wordmark left, three sans links right in fg-3; current and hover in fg.",
+      "html": "<header class=\"ds-topbar\"><a class=\"ds-wordmark\" href=\"#\">devgrr</a><nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">글</a><a href=\"#\">주제</a><a href=\"#\">소개</a></nav></header>",
+      "css": ".ds-topbar{display:flex;align-items:center;justify-content:space-between;height:79px;padding:30px 6% 0 5.6%;border-bottom:1px solid var(--line,#2a2f37);background:var(--bg,#12151b);color:var(--fg,#dfe3e9)}.ds-wordmark{font-family:'Commit Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-ligatures:none;font-weight:700;font-size:30px;letter-spacing:-.02em;line-height:1;color:inherit;text-decoration:none}.ds-nav{display:flex;gap:24px;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:17.5px;font-weight:500;color:var(--fg-3,#7b808a)}.ds-nav a{color:inherit;text-decoration:none;transition:color .2s cubic-bezier(0.16,1,0.3,1)}.ds-nav a:hover,.ds-nav a[aria-current]{color:var(--fg,#dfe3e9)}.ds-nav a:focus-visible,.ds-wordmark:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Table of contents rail",
+      "kind": "nav",
+      "refersTo": "toc-link",
+      "description": "Built from the post h2s; sticky at 32px on desktop, hidden under 1200px. The current section swaps the hairline for a fg rule.",
+      "html": "<nav class=\"ds-toc\" aria-label=\"목차\"><p>목차</p><ol><li><a href=\"#\" aria-current=\"true\">전파(propagation)가 뭔가요</a></li><li><a href=\"#\">주문은 저장하고, 로그는 실패해도 되는 경우</a></li><li><a href=\"#\">REQUIRES_NEW로 분리하기</a></li><li><a href=\"#\">정리</a></li></ol></nav>",
+      "css": ".ds-toc{width:220px;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:14.5px;line-height:1.6;color:var(--fg,#dfe3e9)}.ds-toc p{margin:0 0 10px;color:var(--fg-3,#7b808a)}.ds-toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--line,#2a2f37)}.ds-toc a{display:block;padding:5px 0 5px 14px;margin-left:-1px;border-left:1px solid transparent;color:var(--fg-3,#7b808a);text-decoration:none;transition:color .2s cubic-bezier(0.16,1,0.3,1),border-color .2s cubic-bezier(0.16,1,0.3,1)}.ds-toc a:hover{color:var(--fg,#dfe3e9)}.ds-toc a[aria-current]{color:var(--fg,#dfe3e9);border-left-color:var(--fg,#dfe3e9)}.ds-toc a:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Resume button",
+      "kind": "button",
+      "refersTo": "resume-button",
+      "description": "The only floating control and the only shadow: fixed bottom-right on a post when a saved scroll position exists.",
+      "html": "<button type=\"button\" class=\"ds-resume\">읽던 곳으로</button>",
+      "css": ".ds-resume{padding:10px 16px;border:1px solid var(--line-2,#3a4049);border-radius:999px;background:var(--bg-2,#191c23);color:var(--fg,#dfe3e9);font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:14.5px;line-height:1.6;box-shadow:0 8px 24px -8px rgba(0,0,0,.45);cursor:pointer}.ds-resume:active{transform:translateY(1px)}.ds-resume:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px;border-radius:999px}"
+    },
+    {
+      "name": "Back link",
+      "kind": "button",
+      "refersTo": "nav-link",
+      "description": "The post-foot link back to the log; the one icon on the site, an inline 16px chevron.",
+      "html": "<a class=\"ds-back\" href=\"#\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 3 5 8l5 5\"/></svg>목록으로</a>",
+      "css": ".ds-back{display:inline-flex;align-items:center;gap:8px;font-family:'Wanted Sans Variable','Wanted Sans','Pretendard Variable','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;font-size:15.5px;line-height:1.6;color:var(--fg-2,#b6bbc4);text-decoration:none;transition:color .2s cubic-bezier(0.16,1,0.3,1)}.ds-back svg{width:16px;height:16px}.ds-back:hover{color:var(--fg,#dfe3e9)}.ds-back:focus-visible{outline:2px solid var(--backend,#5ba4ff);outline-offset:3px;border-radius:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Commit Graph",
+    "overview": "devgrr is one senior developer's log for juniors, and the site draws itself the way that log looks in a terminal. The home page is `git log --graph`: a main trunk on the far left, four topic lanes forking from the root commit and merging back into it, a title and a hash on every row. The right pane is the checked-out post, HEAD. Every post opens with its ref line: branch chip, hash, date. The scene is a developer's editor at night; dark is the default written in `:root`, and light is a full sibling theme rather than a fallback.\n\nDensity is editorial, not dashboard: a 100px row pitch on the log, a 70ch measure on posts, 56px section breaks. Decoration comes only from things git and an editor already print: lanes, nodes, hashes, diff gutters, a filename tab, a review comment. There are no cards, no gradients, no thumbnails, no icon set (one inline chevron), and no shadow on anything in flow.\n\nWhere the direction contract and the build diverged, this file records the build. The ground shipped as #12151b rather than the contract's #0e1218, the home split is two equal columns rather than one-third and two-thirds, and the graph topology became a main trunk with merge arcs by the user's decision during the hero phase.",
+    "keyCharacteristics": [
+      "Dark-first with a full light sibling; every color token exists in both blocks.",
+      "Two typefaces with strict jobs: Wanted Sans for prose, Commit Mono for anything git would print.",
+      "Five branch colors reach elements through one custom property, `--c`, set by `data-branch`.",
+      "Flat tonal layering with 1px hairlines; one shadow exists, under a fixed button.",
+      "One authored motion, the log rising from its root; everything else is a 0.2 to 0.3s state change.",
+      "A radius ladder of 4, 5, 8, 10px and pill."
+    ],
+    "rules": [
+      {
+        "name": "The One Lane Rule",
+        "section": "colors",
+        "body": "A branch color reaches an element only through `--c`, which `[data-branch]` sets from the five branch variables. No rule names a branch hex directly; a new branch-colored element gets `data-branch`, not a color."
+      },
+      {
+        "name": "The Sibling Theme Rule",
+        "section": "colors",
+        "body": "Every color token is declared twice: in `:root` for dark and in the `prefers-color-scheme: light` block. A color that exists in one block only is a bug."
+      },
+      {
+        "name": "The Blue Has Two Jobs Rule",
+        "section": "colors",
+        "body": "Backend blue is the only branch color that also works as the interaction color: focus ring, selection tint, body links, and the review-note head tint. The other four never leave their lane."
+      },
+      {
+        "name": "The Two Voices Rule",
+        "section": "typography",
+        "body": "Wanted Sans for what a person wrote; Commit Mono, ligatures off, for what git or the editor prints: the wordmark, hashes, filenames, code. There is no third face and no system display face."
+      },
+      {
+        "name": "The Lowercase Label Rule",
+        "section": "typography",
+        "body": "Labels are lowercase branch names at 12px, weight 500, untracked. Nothing on the site is uppercase or letter-spaced outward."
+      },
+      {
+        "name": "The Reserved Gutter Rule",
+        "section": "layout",
+        "body": "Log rows reserve 239px on the left for the lane field, and each lane is positioned under the horizontal center of its pill. Text never sits under a lane."
+      },
+      {
+        "name": "The Designed Viewport Rule",
+        "section": "layout",
+        "body": "Between 1280 and 1600px the home page scales with the width (zoom clamped 0.93 to 1.16 around 1376px) rather than letting its fixed rhythm float in a wider frame."
+      },
+      {
+        "name": "The One Shadow Rule",
+        "section": "elevation",
+        "body": "Anything in document flow is flat. A shadow is permitted only on a fixed element floating over content, and it is the resume button's soft drop, never a hard offset."
+      },
+      {
+        "name": "The Radius Ladder Rule",
+        "section": "shapes",
+        "body": "4px focus ring, 5px inline code, 8px log rows, 10px panels, pill for tags and floating controls. No other radius."
+      },
+      {
+        "name": "The Checkout Rule",
+        "section": "components",
+        "body": "Hover or focus on a log row checks it out: the row bands, its node grows, and the preview swaps to it. Leaving returns to HEAD. New list surfaces reuse this rather than inventing a hover."
+      }
+    ],
+    "dos": [
+      "Do declare every new color in both the `:root` block and the `prefers-color-scheme: light` block of assets/style.css; no hardcoded colors in rules.",
+      "Do give a branch-colored element `data-branch` and read `var(--c)`; never a branch hex.",
+      "Do put code in a `pre.code` panel with `data-lang`, add `diff` and `data-file` when they apply, and let site.js render the lines.",
+      "Do write post sections as h2 so the TOC and its scroll tracking build themselves.",
+      "Do keep hover and HEAD as a bg-band fill, and focus as the 2px backend-blue ring at a 3px offset.",
+      "Do keep any new motion to a 0.2 to 0.3s state transition on `--ease`; the log's rise is the only authored sequence, and it is off under reduced motion.",
+      "Do keep hashes, filenames, and the wordmark in Commit Mono with ligatures off."
+    ],
+    "donts": [
+      "Don't add cards, gradients, thumbnails, or a shadow on anything in flow.",
+      "Don't add a third typeface, an icon font, or a glyph set; the only icon is one inline SVG chevron.",
+      "Don't uppercase or letter-space labels; branch names are lowercase 12px.",
+      "Don't add a branch without a color variable in both themes, a pill, and a lane; the graph reads the pills to place lanes.",
+      "Don't add per-page styles to posts; all CSS lives in assets/style.css.",
+      "Don't hand-write hashes; they come from the slug."
+    ]
+  }
+}
