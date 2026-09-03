@@ -128,9 +128,6 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   line-height: 1;
 }
 
-.topbar nav { display: flex; gap: 24px; font-size: 17.5px; font-weight: 500; color: var(--fg-3); }
-.topbar nav a { transition: color 0.2s var(--ease); }
-.topbar nav a:hover, .topbar nav a[aria-current] { color: var(--fg); }
 
 /* ---------- home: the log ---------- */
 
@@ -561,7 +558,6 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   :root { --topbar-h: 64px; }
   .topbar { padding: 0 20px; }
   .wordmark { font-size: 24px; }
-  .topbar nav { gap: 18px; font-size: 16px; }
 
   .log { grid-template-columns: 1fr; min-height: 0; }
   .graph-pane { padding: 28px 0 24px 16px; }
