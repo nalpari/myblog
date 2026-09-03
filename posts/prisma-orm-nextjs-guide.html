@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prisma ORM 완전 정복 · devgrr</title>
+  <meta name="description" content="SQL 없이 타입이 맞는 쿼리, 스키마 파일 하나에서 나오는 마이그레이션과 클라이언트. Next.js App Router에서 Prisma를 세팅하고 CRUD, 트랜잭션, 타입 활용, 성능 팁까지 정리합니다." />
+  <link rel="canonical" href="/posts/prisma-orm-nextjs-guide" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/500.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/700.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="/assets/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/">devgrr</a>
+    <nav aria-label="주요 메뉴">
+      <a href="/">글</a>
+      <a href="/#branches">주제</a>
+      <a href="/#about">소개</a>
+    </nav>
+  </header>
+
+  <main class="post-layout">
+    <article class="post">
+      <header class="post-head">
+        <p class="ref">
+          <a class="branch" data-branch="backend" href="/?branch=backend">backend</a>
+          <span class="hash"></span>
+          <time datetime="2025-03">2025-03</time>
+        </p>
+        <h1>Prisma ORM 완전 정복: Next.js 프로젝트에서 왜 Prisma를 써야 하는가</h1>
+        <p class="lede">SQL을 직접 쓰면 유연하지만 타입이 없고, 기존 ORM은 TypeScript에서 타입이 새거나 설정이 무겁습니다. TypeScript 풀스택 환경에서 빠르게 표준이 되고 있는 Prisma ORM을 스키마 파일부터 마이그레이션, Next.js App Router 통합까지 깊게 다룹니다.</p>
+      </header>
+
+      <figure class="cover">
+        <img src="/assets/posts/prisma-orm-nextjs-guide-cover.webp" alt="schema.prisma 파일 하나에서 migration.sql, PrismaClient, Prisma Studio 세 갈래로 뻗어 나가는 그림" width="1600" height="900" fetchpriority="high" />
+      </figure>
+
+      <div class="body">
+        <h2>Prisma란</h2>
+        <p>Prisma는 Node.js와 TypeScript를 위한 차세대 ORM입니다. 2019년에 등장해 2021년 v1.0을 릴리즈했고, GitHub 스타 4만 개가 넘는 프로젝트입니다. 도구 하나가 아니라 세 가지 도구의 묶음입니다.</p>
+
+        <table>
+          <thead>
+            <tr><th>도구</th><th>역할</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Prisma Client</td><td>자동 생성되는, 타입이 맞는 쿼리 빌더</td></tr>
+            <tr><td>Prisma Migrate</td><td>선언적 데이터 마이그레이션 관리 도구</td></tr>
+            <tr><td>Prisma Studio</td><td>데이터베이스를 눈으로 탐색하는 GUI</td></tr>
+          </tbody>
+        </table>
+
+        <p>지원하는 데이터베이스는 PostgreSQL, MySQL과 MariaDB, SQLite, SQL Server, CockroachDB, 그리고 프리뷰 단계인 MongoDB입니다.</p>
+
+        <h2>기존 ORM과 무엇이 다른가</h2>
+        <p>TypeORM이나 Sequelize 같은 전통적 ORM에는 세 가지 한계가 있습니다.</p>
+        <ul>
+          <li><strong>관계 데이터의 타입이 불안전합니다.</strong> <code>relations</code>로 조인한 데이터의 타입이 런타임까지 보장되지 않습니다.</li>
+          <li><strong>N+1 문제가 생기기 쉽습니다.</strong> 관계 데이터를 명시적으로 다루지 않으면 쿼리가 폭발합니다.</li>
+          <li><strong>스키마와 코드가 어긋납니다.</strong> 모델 정의가 흩어져 있어 DB의 실제 상태와 코드가 따로 놉니다.</li>
+        </ul>
+        <p>Prisma는 <code>schema.prisma</code>라는 단일 진실 공급원(single source of truth)에서 출발합니다. 마이그레이션도, 클라이언트도, GUI도 이 파일 하나에서 파생됩니다.</p>
+
+        <pre class="code" data-lang="text">
+schema.prisma
+     │
+     ├──► Prisma Migrate → SQL 마이그레이션 파일
+     ├──► Prisma Client  → 타입이 맞는 쿼리 빌더
+     └──► Prisma Studio  → DB GUI</pre>
+
+        <h2>핵심 개념: Prisma Schema</h2>
+        <p>모든 것은 <code>prisma/schema.prisma</code>에서 시작합니다. 생성기, 데이터소스, 모델 세 부분으로 이루어집니다.</p>
+
+        <pre class="code" data-lang="prisma" data-file="prisma/schema.prisma">
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  profile   Profile?
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  author      User     @relation(fields: [authorId], references: [id])
+  authorId    Int
+
+  categories  Category[]
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id])
+  userId Int     @unique
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts Post[]
+}</pre>
+
+        <h3>주요 어트리뷰트</h3>
+        <table>
+          <thead>
+            <tr><th>어트리뷰트</th><th>설명</th><th>예시</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>@id</code></td><td>기본 키</td><td><code>@id</code></td></tr>
+            <tr><td><code>@default()</code></td><td>기본값</td><td><code>@default(now())</code>, <code>@default(autoincrement())</code></td></tr>
+            <tr><td><code>@unique</code></td><td>유니크 제약</td><td><code>@unique</code></td></tr>
+            <tr><td><code>@updatedAt</code></td><td>수정 시각 자동 갱신</td><td><code>@updatedAt</code></td></tr>
+            <tr><td><code>@relation</code></td><td>관계 정의</td><td><code>@relation(fields: [...], references: [...])</code></td></tr>
+            <tr><td><code>@@index</code></td><td>복합 인덱스</td><td><code>@@index([email, name])</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2>Next.js 프로젝트 셋업</h2>
+        <h3>설치</h3>
+        <pre class="code" data-lang="bash">
+npm install prisma @prisma/client
+npx prisma init</pre>
+        <p><code>prisma init</code>은 스키마 파일 <code>prisma/schema.prisma</code>와, <code>DATABASE_URL</code>이 들어갈 <code>.env</code>를 만들어 줍니다.</p>
+
+        <h3>환경변수 설정</h3>
+        <pre class="code" data-lang="ini" data-file=".env">
+DATABASE_URL="postgresql://user:password@localhost:5432/mydb?schema=public"</pre>
+
+        <h3>마이그레이션</h3>
+        <pre class="code" data-lang="bash">
+# 개발 환경: 마이그레이션 파일 생성 + DB 적용
+npx prisma migrate dev --name init
+
+# 프로덕션: 마이그레이션만 적용
+npx prisma migrate deploy</pre>
+        <p>실행하면 <code>prisma/migrations/</code> 아래에 버전별 SQL 파일이 생깁니다. 이 폴더는 git으로 관리합니다.</p>
+        <pre class="code" data-lang="text">
+prisma/
+└── migrations/
+    ├── 20250301000000_init/
+    │   └── migration.sql
+    └── 20250310000000_add_profile/
+        └── migration.sql</pre>
+
+        <h3>Prisma Client 싱글톤</h3>
+        <p>Next.js 개발 서버는 핫 리로드 때마다 모듈을 다시 평가합니다. 그때마다 Prisma Client가 새로 만들어지지 않도록 전역에 하나만 두는 패턴을 씁니다.</p>
+        <pre class="code" data-lang="typescript" data-file="lib/prisma.ts">
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ['query', 'error', 'warn'],
+  })
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+
+export default prisma</pre>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">lib/prisma.ts:8</span></p>
+          <p>파일을 고칠 때마다 <code>new PrismaClient()</code>가 실행되면 커넥션 풀이 하나씩 늘어나고, 어느 순간 <code>too many connections</code>로 끝납니다. <code>globalThis</code>에 붙여 두는 이유가 그것입니다. 프로덕션에서는 모듈이 한 번만 로드되므로 붙이지 않습니다.</p>
+        </aside>
+
+        <h2>Prisma Client CRUD 패턴</h2>
+        <h3>조회</h3>
+        <pre class="code" data-lang="typescript">
+import { prisma } from '@/lib/prisma'
+
+// 단일 레코드
+const user = await prisma.user.findUnique({
+  where: { id: 1 },
+})
+
+// null 대신 에러를 던지고 싶을 때
+const admin = await prisma.user.findUniqueOrThrow({
+  where: { email: 'admin@example.com' },
+})
+
+// 조건 검색
+const activeUsers = await prisma.user.findMany({
+  where: {
+    posts: {
+      some: { published: true }
+    }
+  },
+  orderBy: { createdAt: 'desc' },
+  take: 10,
+  skip: 0,
+})
+
+// 관계 데이터 함께 조회 (include)
+const userWithPosts = await prisma.user.findUnique({
+  where: { id: 1 },
+  include: {
+    posts: {
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+    },
+    profile: true,
+  },
+})
+
+// 필드 선택 (select): 필요한 컬럼만 가져온다
+const userNames = await prisma.user.findMany({
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    _count: {
+      select: { posts: true }
+    }
+  }
+})</pre>
+
+        <h3>생성</h3>
+        <pre class="code" data-lang="typescript">
+// 단일 생성, 관계까지 한 번에 (nested create)
+const newUser = await prisma.user.create({
+  data: {
+    email: 'sangwook@example.com',
+    name: '김상욱',
+    profile: {
+      create: {
+        bio: '개발팀 3팀 차장'
+      }
+    }
+  },
+  include: { profile: true }
+})
+
+// 다중 생성 (batch)
+await prisma.post.createMany({
+  data: [
+    { title: '첫 번째 포스트', authorId: 1 },
+    { title: '두 번째 포스트', authorId: 1 },
+  ],
+  skipDuplicates: true,
+})</pre>
+
+        <h3>수정</h3>
+        <pre class="code" data-lang="typescript">
+// 단일 업데이트, 관계 데이터도 같이
+const updatedUser = await prisma.user.update({
+  where: { id: 1 },
+  data: {
+    name: '김상욱 (수정됨)',
+    posts: {
+      updateMany: {
+        where: { published: false },
+        data: { published: true }
+      }
+    }
+  }
+})
+
+// upsert: 없으면 만들고, 있으면 고친다
+const user = await prisma.user.upsert({
+  where: { email: 'sangwook@example.com' },
+  update: { name: '김상욱' },
+  create: {
+    email: 'sangwook@example.com',
+    name: '김상욱',
+  }
+})</pre>
+
+        <h3>삭제</h3>
+        <pre class="code" data-lang="typescript">
+// 단일 삭제
+await prisma.user.delete({
+  where: { id: 1 }
+})
+
+// 조건 삭제
+await prisma.post.deleteMany({
+  where: {
+    published: false,
+    createdAt: { lt: new Date('2024-01-01') }
+  }
+})</pre>
+
+        <h3>필터링</h3>
+        <p><code>where</code> 절은 SQL의 거의 모든 연산을 타입이 맞는 형태로 표현합니다.</p>
+        <pre class="code" data-lang="typescript">
+// 복합 조건
+const posts = await prisma.post.findMany({
+  where: {
+    AND: [
+      { published: true },
+      { createdAt: { gte: new Date('2025-01-01') } },
+      {
+        OR: [
+          { title: { contains: 'Prisma', mode: 'insensitive' } },
+          { content: { startsWith: '오늘' } }
+        ]
+      },
+      { author: { NOT: { name: null } } }
+    ]
+  }
+})
+
+// 목록 필터
+const picked = await prisma.post.findMany({
+  where: {
+    id: { in: [1, 2, 3] },
+  }
+})
+
+// 관계 필터
+const usersWithManyPosts = await prisma.user.findMany({
+  where: {
+    posts: { some: { published: true } },
+    _count: { posts: { gt: 5 } }  // Prisma 5.x부터
+  }
+})</pre>
+
+        <h2>트랜잭션 처리</h2>
+        <p>정합성이 중요한 작업은 트랜잭션으로 묶습니다. 배열 방식과 인터랙티브 방식 두 가지가 있고, 중간에 검증 로직이 끼어야 하면 인터랙티브 방식입니다.</p>
+        <pre class="code" data-lang="typescript">
+// 방법 1: $transaction 배열 (여러 쿼리를 한 트랜잭션으로)
+const [newUser, newPost] = await prisma.$transaction([
+  prisma.user.create({ data: { email: 'test@test.com', name: 'Test' } }),
+  prisma.post.create({ data: { title: 'Test Post', authorId: 1 } }),
+])
+
+// 방법 2: interactive transaction (권장, 중간에 롤백 가능)
+const result = await prisma.$transaction(async (tx) =&gt; {
+  const user = await tx.user.create({
+    data: { email: 'new@example.com', name: '신규유저' }
+  })
+
+  // 비즈니스 로직 검증
+  if (user.id &gt; 1000) {
+    throw new Error('사용자 수 한도 초과') // 던지면 자동 롤백
+  }
+
+  const post = await tx.post.create({
+    data: {
+      title: '첫 포스트',
+      authorId: user.id
+    }
+  })
+
+  return { user, post }
+})</pre>
+
+        <h2>Next.js App Router와의 통합</h2>
+        <h3>Server Component에서 직접 쓰기</h3>
+        <pre class="code" data-lang="typescript" data-file="app/users/page.tsx">
+import { prisma } from '@/lib/prisma'
+
+export default async function UsersPage() {
+  // 서버 컴포넌트에서는 API 없이 바로 DB를 읽는다
+  const users = await prisma.user.findMany({
+    include: {
+      _count: { select: { posts: true } }
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+
+  return (
+    &lt;div&gt;
+      {users.map(user =&gt; (
+        &lt;div key={user.id}&gt;
+          &lt;h2&gt;{user.name}&lt;/h2&gt;
+          &lt;p&gt;포스트: {user._count.posts}개&lt;/p&gt;
+        &lt;/div&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}</pre>
+
+        <h3>Route Handler</h3>
+        <pre class="code" data-lang="typescript" data-file="app/api/posts/route.ts">
+import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const page = parseInt(searchParams.get('page') ?? '1')
+  const limit = parseInt(searchParams.get('limit') ?? '10')
+
+  const [posts, total] = await prisma.$transaction([
+    prisma.post.findMany({
+      skip: (page - 1) * limit,
+      take: limit,
+      include: { author: { select: { name: true } } },
+      orderBy: { createdAt: 'desc' }
+    }),
+    prisma.post.count()
+  ])
+
+  return NextResponse.json({
+    data: posts,
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+  })
+}
+
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+
+  const post = await prisma.post.create({
+    data: {
+      title: body.title,
+      content: body.content,
+      authorId: body.authorId,
+    }
+  })
+
+  return NextResponse.json(post, { status: 201 })
+}</pre>
+
+        <h3>Server Action</h3>
+        <pre class="code" data-lang="typescript" data-file="app/actions/post.ts">
+'use server'
+
+import { prisma } from '@/lib/prisma'
+import { revalidatePath } from 'next/cache'
+
+export async function createPost(formData: FormData) {
+  const title = formData.get('title') as string
+  const content = formData.get('content') as string
+
+  await prisma.post.create({
+    data: { title, content, authorId: 1 }
+  })
+
+  revalidatePath('/posts') // 캐시 갱신
+}</pre>
+
+        <h2>타입 시스템 활용</h2>
+        <p>Prisma가 생성하는 타입을 그대로 쓰면 코드 전체에서 타입이 한 곳에서 나옵니다. <code>include</code>나 <code>select</code> 구조까지 정확히 반영된 타입을 뽑아낼 수 있습니다.</p>
+        <pre class="code" data-lang="typescript">
+import { Prisma, User, Post } from '@prisma/client'
+
+// include 구조를 그대로 반영한 타입
+type UserWithPosts = Prisma.UserGetPayload&lt;{
+  include: {
+    posts: { include: { categories: true } }
+    profile: true
+  }
+}&gt;
+
+function renderUser(user: UserWithPosts) {
+  console.log(user.profile?.bio)          // Profile | null
+  console.log(user.posts[0].categories)   // Category[]
+}
+
+// 입력 타입
+type CreateUserInput = Prisma.UserCreateInput
+type UpdatePostInput = Prisma.PostUpdateInput
+
+async function updatePost(id: number, data: UpdatePostInput) {
+  return prisma.post.update({ where: { id }, data })
+}</pre>
+
+        <h2>Migrate 전략과 시딩</h2>
+        <h3>개발 환경</h3>
+        <pre class="code" data-lang="bash">
+# 스키마를 고친 뒤 마이그레이션 생성 + 적용
+npx prisma migrate dev --name add_user_role
+
+# DB를 스키마에 맞게 강제 리셋 (데이터 초기화)
+npx prisma migrate reset</pre>
+
+        <h3>프로덕션 환경</h3>
+        <pre class="code" data-lang="bash">
+# 마이그레이션 상태 확인
+npx prisma migrate status
+
+# 아직 적용되지 않은 파일만 실행
+npx prisma migrate deploy</pre>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">migrate dev</span></p>
+          <p><code>migrate dev</code>는 스키마와 DB가 어긋나 있으면 DB를 리셋하겠냐고 묻고, 답에 따라 데이터를 지웁니다. 프로덕션 <code>DATABASE_URL</code>을 물고 있는 터미널에서 이 명령을 치는 사고가 생각보다 흔합니다. 프로덕션에서는 <code>migrate deploy</code>만 씁니다.</p>
+        </aside>
+
+        <h3>package.json 스크립트</h3>
+        <pre class="code" data-lang="json" data-file="package.json">
+{
+  "scripts": {
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:generate": "prisma generate",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}</pre>
+
+        <h3>시딩: 초기 데이터 넣기</h3>
+        <p><code>upsert</code>로 쓰면 몇 번을 실행해도 같은 결과가 나옵니다.</p>
+        <pre class="code" data-lang="typescript" data-file="prisma/seed.ts">
+import { prisma } from '../lib/prisma'
+
+async function main() {
+  // 카테고리
+  const categories = await Promise.all([
+    prisma.category.upsert({
+      where: { name: 'Technology' },
+      update: {},
+      create: { name: 'Technology' }
+    }),
+    prisma.category.upsert({
+      where: { name: 'DevOps' },
+      update: {},
+      create: { name: 'DevOps' }
+    })
+  ])
+
+  // 관리자 계정
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
+      email: 'admin@example.com',
+      name: '관리자',
+      profile: { create: { bio: '시스템 관리자' } },
+      posts: {
+        create: [
+          {
+            title: 'Prisma ORM 시작하기',
+            content: '이 포스트는 시드 데이터입니다.',
+            published: true,
+            categories: { connect: [{ id: categories[0].id }] }
+          }
+        ]
+      }
+    }
+  })
+
+  console.log(`시드 완료: 관리자(${admin.email}) 생성됨`)
+}
+
+main()
+  .catch(console.error)
+  .finally(() =&gt; prisma.$disconnect())</pre>
+
+        <h2>성능 최적화 팁</h2>
+        <h3>select로 필요한 필드만</h3>
+        <pre class="code" data-lang="typescript">
+// 모든 필드 조회 (비효율)
+const users = await prisma.user.findMany()
+
+// 필요한 필드만 선택
+const slimUsers = await prisma.user.findMany({
+  select: { id: true, name: true, email: true }
+})</pre>
+
+        <h3>페이지네이션</h3>
+        <pre class="code" data-lang="typescript">
+// 커서 기반 페이지네이션 (대용량 데이터에 적합)
+const posts = await prisma.post.findMany({
+  take: 10,
+  cursor: { id: lastPostId },  // 마지막으로 조회한 ID
+  skip: 1,                     // cursor 자체는 건너뛴다
+  orderBy: { id: 'asc' }
+})</pre>
+
+        <h3>복잡한 쿼리는 $queryRaw</h3>
+        <pre class="code" data-lang="typescript">
+// 복잡한 집계나 raw SQL이 필요할 때
+const result = await prisma.$queryRaw&lt;{ count: bigint; month: string }[]&gt;`
+  SELECT
+    DATE_TRUNC('month', created_at) as month,
+    COUNT(*) as count
+  FROM posts
+  WHERE published = true
+  GROUP BY month
+  ORDER BY month DESC
+  LIMIT 12
+`</pre>
+
+        <h3>인덱스</h3>
+        <pre class="code" data-lang="prisma" data-file="prisma/schema.prisma">
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  authorId  Int
+  createdAt DateTime @default(now())
+
+  @@index([authorId])            // 단일 인덱스
+  @@index([authorId, createdAt]) // 복합 인덱스
+}</pre>
+
+        <h2>Prisma를 써야 하는 이유</h2>
+        <h3>TypeScript 타입 안전성</h3>
+        <p>쿼리 결과에 <code>include</code>와 <code>select</code> 구조까지 정확히 반영된 타입이 자동으로 생성됩니다. IDE 자동완성이 끝까지 따라오고, 런타임 에러를 컴파일 타임에 잡습니다.</p>
+        <h3>단일 진실 공급원</h3>
+        <p>DB 스키마, 타입, 마이그레이션이 모두 <code>schema.prisma</code> 하나에서 파생됩니다. 코드와 DB가 어긋날 길이 없습니다.</p>
+        <h3>직관적이고 선언적인 API</h3>
+        <p>SQL을 몰라도 복잡한 관계 쿼리를 자연스럽게 씁니다. 중첩 생성(<code>create</code>), 연결(<code>connect</code>), 끊기(<code>disconnect</code>) 같은 관계 조작이 특히 그렇습니다.</p>
+        <h3>자동화된 마이그레이션</h3>
+        <p>스키마를 고치면 마이그레이션 파일이 생성되고 버전 관리까지 따라옵니다. Flyway 같은 별도 도구를 관리할 필요가 없습니다.</p>
+        <h3>Next.js App Router와의 궁합</h3>
+        <p>Server Component, Server Action, Route Handler 어디서든 바로 씁니다. Vercel의 공식 Next.js 예시도 Prisma를 기본 ORM으로 씁니다.</p>
+        <h3>Prisma Studio</h3>
+        <pre class="code" data-lang="bash">
+npx prisma studio</pre>
+        <p>로컬에서 도는 GUI로 DB를 눈으로 보고 고칠 수 있습니다. 개발 중 데이터 확인이 눈에 띄게 빨라집니다.</p>
+
+        <h2>경쟁 도구 비교</h2>
+        <table>
+          <thead>
+            <tr><th>기준</th><th>Prisma</th><th>TypeORM</th><th>Drizzle ORM</th><th>Sequelize</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>TypeScript 지원</td><td>매우 좋음</td><td>보통</td><td>매우 좋음</td><td>약함</td></tr>
+            <tr><td>학습 곡선</td><td>낮음</td><td>중간</td><td>낮음</td><td>중간</td></tr>
+            <tr><td>마이그레이션</td><td>자동화</td><td>수동/자동</td><td>수동</td><td>수동</td></tr>
+            <tr><td>번들 사이즈</td><td>중간</td><td>큼</td><td>매우 작음</td><td>큼</td></tr>
+            <tr><td>생태계</td><td>매우 활발</td><td>활발</td><td>성장 중</td><td>오래됨</td></tr>
+            <tr><td>Raw SQL</td><td>지원</td><td>지원</td><td>우수</td><td>지원</td></tr>
+            <tr><td>GUI 도구</td><td>Studio 내장</td><td>없음</td><td>없음</td><td>없음</td></tr>
+          </tbody>
+        </table>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">Drizzle ORM</span></p>
+          <p>Drizzle ORM도 빠르게 크고 있는 강력한 대안입니다. 마이그레이션 자동화와 Studio 같은 편의 기능은 Prisma가 앞서지만, 번들 사이즈가 중요한 Edge Runtime 환경이라면 Drizzle을 고려할 만합니다.</p>
+        </aside>
+
+        <h2>주의사항과 알려진 한계</h2>
+        <ol>
+          <li><strong>Prisma Client 번들 사이즈.</strong> 런타임 의존성이 있어 Vercel Edge Runtime이나 Cloudflare Workers에서는 <code>@prisma/adapter-neon</code> 같은 별도 어댑터가 필요합니다.</li>
+          <li><strong>대용량 batch 작업.</strong> <code>createMany</code>, <code>updateMany</code>는 <code>returning</code> 절 지원이 제한적입니다. 대용량 배치에는 <code>$executeRaw</code>를 고려하세요.</li>
+          <li><strong>스키마 변경은 신중하게.</strong> <code>migrate dev</code>는 기존 데이터를 바꾸거나 지울 수 있습니다. 프로덕션에서는 반드시 <code>migrate deploy</code>를 쓰고, 마이그레이션 파일을 git으로 관리하세요.</li>
+        </ol>
+
+        <h2>마치며</h2>
+        <p>Prisma는 TypeScript와 Node.js 기반 풀스택 환경에서 데이터베이스 작업을 가장 안전하고 생산적으로 처리하는 도구입니다. 특히 Next.js App Router의 Server Component, Server Action과 조합하면 별도 API 레이어 없이도 타입이 맞는 채로 DB를 다룰 수 있습니다.</p>
+        <p>팀 프로젝트에서는 스키마 기반 단일 진실 공급원, 자동화된 마이그레이션, Studio의 조합이 팀원의 온보딩 시간과 디버깅 시간을 크게 줄여 줍니다. 처음에는 스키마 파일이나 마이그레이션 개념이 낯설 수 있지만, 한 번 익숙해지면 그 전으로 돌아가기 어렵습니다. 아직 써 보지 않았다면 새 Next.js 프로젝트에 바로 적용해 보길 권합니다.</p>
+
+        <h3>참고 자료</h3>
+        <ul>
+          <li><a href="https://www.prisma.io/docs">Prisma 공식 문서</a></li>
+          <li><a href="https://github.com/prisma/prisma">Prisma GitHub</a></li>
+          <li><a href="https://vercel.com/templates/next.js/prisma">Next.js + Prisma 예시 (Vercel)</a></li>
+          <li><a href="https://pris.ly/discord">Prisma Discord 커뮤니티</a></li>
+        </ul>
+      </div>
+
+      <footer class="post-foot">
+        <a href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>목록으로</a>
+      </footer>
+    </article>
+
+    <nav class="toc" aria-label="목차"></nav>
+  </main>
+</body>
+</html>

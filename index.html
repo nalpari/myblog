@@ -49,9 +49,28 @@
 -# ...수정하고 커밋...
 -git checkout feature/new-api
 -git stash pop
-+git worktree add ../my-project-hotfix -b hotfix/critical-bug main
++git worktree add ../my-project-hotfix \
++  -b hotfix/critical-bug main
 +cd ../my-project-hotfix
 +# feature 브랜치는 그대로. 작업 디렉토리만 하나 더 생겼다.</pre>
+          </li>
+          <li data-branch="backend" data-slug="prisma-orm-nextjs-guide">
+            <a href="/posts/prisma-orm-nextjs-guide"><span class="title">Prisma ORM 완전 정복</span></a>
+            <p class="summary">SQL 없이 타입이 맞는 쿼리, 스키마 파일 하나에서 나오는 마이그레이션과 클라이언트. Next.js App Router에서 Prisma를 세팅하고 CRUD, 트랜잭션, 타입 활용까지 정리합니다.</p>
+            <pre class="snippet" data-lang="typescript" data-file="lib/prisma.ts" hidden>
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+// 핫 리로드마다 새로 만들지 않도록 전역에 하나만 둔다
+export const prisma =
+  globalForPrisma.prisma ?? new PrismaClient()
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma
+}</pre>
           </li>
         </ol>
       </div>
