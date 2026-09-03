@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>React 렌더링은 언제 일어나는가 · devgrr</title>
+  <meta name="description" content="state가 바뀌면 다시 그린다는 절반만 맞는 말입니다. 컴포넌트가 다시 렌더링되는 세 가지 조건과, memo 없이 렌더링을 건너뛰는 children 패턴." />
+  <link rel="canonical" href="/posts/react-when-render" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/500.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/700.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="/assets/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/">devgrr</a>
+    <nav aria-label="주요 메뉴">
+      <a href="/">글</a>
+      <a href="/#branches">주제</a>
+      <a href="/#about">소개</a>
+    </nav>
+  </header>
+
+  <main class="post-layout">
+    <article class="post">
+      <header class="post-head">
+        <p class="ref">
+          <a class="branch" data-branch="frontend" href="/?branch=frontend">frontend</a>
+          <span class="hash"></span>
+          <time datetime="2026-08-31">2026-08-31</time>
+          <span class="sample">예시 글</span>
+        </p>
+        <h1>React 렌더링은 언제 일어나는가</h1>
+        <p class="lede">"state가 바뀌면 다시 그린다"는 절반만 맞습니다. 컴포넌트가 다시 렌더링되는 조건은 딱 세 가지이고, 그중 하나를 대부분 잊고 있습니다.</p>
+      </header>
+
+      <div class="body">
+        <h2>렌더링이 일어나는 세 가지 경우</h2>
+        <ol>
+          <li>자기 state가 바뀔 때. <code>setState</code>, <code>useReducer</code>의 dispatch.</li>
+          <li>부모가 렌더링될 때. props가 바뀌었든 아니든.</li>
+          <li>구독한 context 값이 바뀔 때.</li>
+        </ol>
+        <p>2번이 핵심입니다. 부모가 렌더링되면 자식은 props가 그대로여도 다시 렌더링됩니다. React는 기본적으로 "props가 바뀌었나"를 비교하지 않습니다. 비교하게 만들려면 <code>React.memo</code>가 필요합니다.</p>
+
+        <pre class="code" data-lang="javascript" data-file="Parent.jsx">
+function Parent() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;section&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;
+      &lt;Child /&gt;   {/* count와 무관하지만 버튼을 누를 때마다 다시 렌더링된다 */}
+    &lt;/section&gt;
+  );
+}</pre>
+
+        <h2>렌더링과 DOM 업데이트는 다릅니다</h2>
+        <p>렌더링은 컴포넌트 함수를 실행해서 "이렇게 보여야 한다"는 결과(엘리먼트 트리)를 만드는 일입니다. React는 그 결과를 이전 결과와 비교해서 달라진 부분만 실제 DOM에 반영합니다. 그러니 렌더링이 자주 일어나도 DOM이 바뀌지 않으면 비용은 함수 실행뿐입니다. 대부분의 컴포넌트는 그 비용이 작아서 최적화가 필요 없습니다.</p>
+
+        <h2>부모가 다시 그려도 자식이 그려지지 않는 경우</h2>
+        <p>엘리먼트를 props(<code>children</code>)로 받으면, 부모가 렌더링돼도 그 엘리먼트는 같은 객체라서 React가 건너뜁니다.</p>
+
+        <pre class="code diff" data-lang="javascript" data-file="Parent.jsx">
+-function Parent() {
++function Parent({ children }) {
+   const [count, setCount] = useState(0);
+   return (
+     &lt;section&gt;
+       &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;
+-      &lt;Child /&gt;
++      {children}   {/* 부모가 다시 그려져도 같은 엘리먼트 */}
+     &lt;/section&gt;
+   );
+ }</pre>
+
+        <p><code>{children}</code>은 <code>Parent</code> 바깥에서 만들어진 엘리먼트입니다. <code>Parent</code>가 다시 실행돼도 그 객체는 그대로이고, React는 같은 참조를 보면 그 서브트리를 건너뜁니다. <code>memo</code> 없이 되는 최적화입니다.</p>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">Parent.jsx:7</span></p>
+          <p><code>React.memo</code>부터 붙이기 전에, 상태를 아래로 내리거나(state colocation) 자식을 <code>children</code>으로 올릴 수 있는지 먼저 보세요. 구조로 해결되는 문제에 <code>memo</code>를 붙이면 의존성 관리라는 새 문제가 생깁니다.</p>
+        </aside>
+
+        <h2>정리</h2>
+        <p>렌더링 조건은 세 가지, 그중 "부모가 렌더링될 때"를 잊지 마세요. 렌더링과 DOM 업데이트는 다른 일이라 렌더링 횟수 자체는 대부분 문제가 아닙니다. 정말 비싼 자식이 있다면 <code>children</code>으로 올리는 방법을 <code>memo</code>보다 먼저 떠올리세요.</p>
+      </div>
+
+      <footer class="post-foot">
+        <a href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>목록으로</a>
+      </footer>
+    </article>
+
+    <nav class="toc" aria-label="목차"></nav>
+  </main>
+</body>
+</html>
