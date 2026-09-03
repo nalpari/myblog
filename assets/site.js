@@ -10,10 +10,69 @@
 
   const HEAD_KEY = 'devgrr:head';
   const POS_KEY = 'devgrr:pos';
+  const THEME_KEY = 'devgrr:theme';
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode: the page still works */ } },
   };
+  const lightQ = matchMedia('(prefers-color-scheme: light)');
+
+  /* ---------- theme: follow the OS until a dark/light press writes html[data-theme] ---------- */
+
+  function resolvedTheme() {
+    const t = store.get(THEME_KEY);
+    return t === 'light' || t === 'dark' ? t : (lightQ.matches ? 'light' : 'dark');
+  }
+
+  function applyTheme(t) {
+    const root = document.documentElement;
+    if (t === 'light' || t === 'dark') root.dataset.theme = t;
+    else delete root.dataset.theme;
+    const now = resolvedTheme();
+    $$('.theme button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.set === now)));
+    $$('picture').forEach((p) => {
+      const img = $('img', p);
+      if (!img) return;
+      if (!img.dataset.src) img.dataset.src = img.getAttribute('src') || '';
+      let darkSrc = '';
+      $$('source', p).forEach((s) => {
+        const orig = s.dataset.media || s.getAttribute('media') || '';
+        if (!orig.includes('prefers-color-scheme')) return;
+        if (!s.dataset.media) s.dataset.media = orig;
+        if (!s.dataset.srcset) s.dataset.srcset = s.getAttribute('srcset') || '';
+        const wantsDark = s.dataset.media.includes('dark');
+        s.media = wantsDark === (now === 'dark') ? 'all' : 'not all';
+        if (wantsDark) darkSrc = s.dataset.srcset;
+      });
+      const next = now === 'dark' && darkSrc ? darkSrc : img.dataset.src;
+      if (next && img.getAttribute('src') !== next) img.setAttribute('src', next);
+    });
+    dispatchEvent(new Event('themechange'));
+  }
+
+  function initTheme() {
+    const bar = $('.topbar');
+    if (!bar) return;
+    const group = document.createElement('div');
+    group.className = 'theme';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', '화면 테마');
+    ['dark', 'light'].forEach((name) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.set = name;
+      b.textContent = name;
+      b.addEventListener('click', () => { store.set(THEME_KEY, name); applyTheme(name); });
+      group.appendChild(b);
+    });
+    bar.appendChild(group);
+    applyTheme(store.get(THEME_KEY));
+    lightQ.addEventListener('change', () => {
+      const t = store.get(THEME_KEY);
+      if (t !== 'light' && t !== 'dark') applyTheme();
+    });
+  }
+  initTheme();
 
   // A stable 7-hex "commit hash" from the slug (FNV-1a), so nobody maintains hashes by hand.
   function hash7(s) {
@@ -153,7 +212,7 @@
 
     // j / k walk the log like a pager; Enter opens (native link)
     document.addEventListener('keydown', (e) => {
-      if (e.metaKey || e.ctrlKey || e.altKey || /^(input|textarea|select)$/i.test(e.target.tagName)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest('.theme') || /^(input|textarea|select)$/i.test(e.target.tagName)) return;
       if (e.key !== 'j' && e.key !== 'k') return;
       const visible = rows.filter((r) => !graph.dataset.filter || r.dataset.branch === graph.dataset.filter);
       const cur = rows.find((r) => r.contains(document.activeElement)) || rows.find((r) => r.classList.contains('is-head'));
@@ -172,6 +231,7 @@
 
     layout();
     show(head);
+    addEventListener('themechange', () => { const s = shown; layout(); shown = null; show(s || head); });
 
     // /?branch=backend arrives from a post's branch tag: land filtered
     const wanted = new URLSearchParams(location.search).get('branch');

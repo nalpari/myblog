@@ -7,6 +7,12 @@
   <meta name="description" content="SQL 없이 타입이 맞는 쿼리, 스키마 파일 하나에서 나오는 마이그레이션과 클라이언트. Next.js App Router에서 Prisma를 세팅하고 CRUD, 트랜잭션, 타입 활용, 성능 팁까지 정리합니다." />
   <link rel="canonical" href="/posts/prisma-orm-nextjs-guide" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    try {
+      var t = localStorage.getItem('devgrr:theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />

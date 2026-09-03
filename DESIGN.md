@@ -177,14 +177,14 @@ components:
 
 **Creative North Star: "The Commit Graph"**
 
-devgrr is one senior developer's log for juniors, and the site draws itself the way that log looks in a terminal. The home page is `git log --graph`: a main trunk on the far left, four topic lanes forking from the root commit and merging back into it, a title and a hash on every row. The right pane is the checked-out post, HEAD. Every post opens with its ref line: branch chip, hash, date. The scene is a developer's editor at night; dark is the default written in `:root`, and light is a full sibling theme rather than a fallback.
+devgrr is one senior developer's log for juniors, and the site draws itself the way that log looks in a terminal. The home page is `git log --graph`: a main trunk on the far left, four topic lanes forking from the root commit and merging back into it, a title and a hash on every row. The right pane is the checked-out post, HEAD. Every post opens with its ref line: branch chip, hash, date. The scene is a developer's editor at night; dark is the default written in `:root` as the second argument of `light-dark()`, and light is a full sibling theme rather than a fallback. A `dark`/`light` pill in the top bar writes the choice to `html[data-theme]`.
 
 Density is editorial, not dashboard: a 100px row pitch on the log, a 70ch measure on posts, 56px section breaks. Decoration comes only from things git and an editor already print: lanes, nodes, hashes, diff gutters, a filename tab, a review comment. There are no cards, no gradients, no thumbnails, no icon set (one inline chevron), and no shadow on anything in flow.
 
 Where the direction contract and the build diverged, this file records the build. The ground shipped as #12151b rather than the contract's #0e1218, the home split is two equal columns rather than one-third and two-thirds, and the graph topology became a main trunk with merge arcs by the user's decision during the hero phase.
 
 **Key Characteristics:**
-- Dark-first with a full light sibling; every color token exists in both blocks.
+- Dark-first with a full light sibling; every color token is one `light-dark()` value, forced by `html[data-theme]` or else by `prefers-color-scheme`.
 - Two typefaces with strict jobs: Wanted Sans for prose, Commit Mono for anything git would print.
 - Five branch colors reach elements through one custom property, `--c`, set by `data-branch`.
 - Flat tonal layering with 1px hairlines; one shadow exists, under a fixed button.
@@ -223,7 +223,7 @@ A cool charcoal ground with four saturated branch hues and a grey trunk; blue is
 ### Named Rules
 **The One Lane Rule.** A branch color reaches an element only through `--c`, which `[data-branch]` sets from the five branch variables. No rule names a branch hex directly; a new branch-colored element gets `data-branch`, not a color.
 
-**The Sibling Theme Rule.** Every color token is declared twice: in `:root` for dark and in the `prefers-color-scheme: light` block. A color that exists in one block only is a bug.
+**The Sibling Theme Rule.** Every color token is one `light-dark(light, dark)` value on `:root`. `html[data-theme]` forces `color-scheme`; without it the used scheme follows `prefers-color-scheme`. A token that is a single hex is a bug.
 
 **The Blue Has Two Jobs Rule.** Backend blue is the only branch color that also works as the interaction color: focus ring, selection tint, body links, and the review-note head tint. The other four never leave their lane.
 
@@ -330,8 +330,14 @@ The senior's comment on the commit: a hairlined 10px panel with a header row.
 - **Head:** padding 10px 16px, 14px fg-2, bold author in fg, a mono location in fg-3, background 10% backend blue into bg-2, bottom hairline.
 - **Body:** bg-2, padding 16px 16px 18px; following paragraphs lose their top padding.
 
+### Theme switch
+A two-segment pill on the right of the top bar, injected by site.js: `dark` and `light` in 12.5px Commit Mono.
+- **Shape:** pill, 27px (24px on mobile), 1px line-2 border, bg-2, no shadow (it sits in flow).
+- **Rest:** fg-3. **Hover:** fg. **Pressed** (`aria-pressed`): bg-band fill, fg. **Active:** 1px push down.
+- First visit follows `prefers-color-scheme`. A press writes `devgrr:theme` and sets `html[data-theme]`. In-body `<picture>` sources that key off `prefers-color-scheme` are rewritten to match the forced scheme.
+
 ### Navigation
-- **Top bar:** three 17.5px weight 500 links in fg-3; current and hover in fg over 0.2s. 16px with an 18px gap on mobile.
+- **Top bar:** wordmark left, theme switch right.
 - **TOC rail:** built from the post's h2s; sticky at 32px; 14.5px; a 1px left hairline with each link padded 5px 0 5px 14px in fg-3, hover fg, current fg with a fg left rule replacing the hairline. Hidden under 1200px.
 - **Back link** (post foot): 15.5px fg-2 with a 16px inline SVG chevron, hover fg.
 - **Body links:** backend blue, underlined at a 4px offset in a 50% blue mix, full blue on hover.
@@ -351,7 +357,7 @@ Drawn by site.js from the list DOM; without JS the list is a plain list.
 ## Do's and Don'ts
 
 ### Do:
-- **Do** declare every new color in both the `:root` block and the `prefers-color-scheme: light` block of assets/style.css; no hardcoded colors in rules.
+- **Do** declare every new color as `light-dark(light, dark)` on `:root` in assets/style.css; no hardcoded colors in rules.
 - **Do** give a branch-colored element `data-branch` and read `var(--c)`; never a branch hex.
 - **Do** put code in a `pre.code` panel with `data-lang`, add `diff` and `data-file` when they apply, and let site.js render the lines.
 - **Do** write post sections as h2 so the TOC and its scroll tracking build themselves.
@@ -363,6 +369,6 @@ Drawn by site.js from the list DOM; without JS the list is a plain list.
 - **Don't** add cards, gradients, thumbnails, or a shadow on anything in flow.
 - **Don't** add a third typeface, an icon font, or a glyph set; the only icon is one inline SVG chevron.
 - **Don't** uppercase or letter-space labels; branch names are lowercase 12px.
-- **Don't** add a branch without a color variable in both themes, a pill, and a lane; the graph reads the pills to place lanes.
+- **Don't** add a branch without a `light-dark()` color variable, a pill, and a lane; the graph reads the pills to place lanes.
 - **Don't** add per-page styles to posts; all CSS lives in assets/style.css.
 - **Don't** hand-write hashes; they come from the slug.

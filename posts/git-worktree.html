@@ -7,6 +7,12 @@
   <meta name="description" content="feature 브랜치 작업 중 main 핫픽스가 터지면 stash 대신 디렉토리를 하나 더 엽니다. git worktree의 원리, 기본 명령, 핫픽스와 리뷰 시나리오, bare 저장소 패턴까지." />
   <link rel="canonical" href="/posts/git-worktree" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    try {
+      var t = localStorage.getItem('devgrr:theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />

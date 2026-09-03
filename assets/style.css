@@ -3,74 +3,44 @@
 :root {
   color-scheme: dark light;
 
-  --bg: #12151b;
-  --bg-2: #191c23;
-  --bg-band: #1c212d;
-  --line: #2a2f37;
-  --line-2: #3a4049;
-  --fg: #dfe3e9;
-  --fg-2: #b6bbc4;
-  --fg-3: #7b808a;
+  --bg: light-dark(#f7f8fa, #12151b);
+  --bg-2: light-dark(#ffffff, #191c23);
+  --bg-band: light-dark(#e9ecf1, #1c212d);
+  --line: light-dark(#dfe3e8, #2a2f37);
+  --line-2: light-dark(#c9ced6, #3a4049);
+  --fg: light-dark(#16191d, #dfe3e9);
+  --fg-2: light-dark(#4b5260, #b6bbc4);
+  --fg-3: light-dark(#6f7681, #7b808a);
 
-  --frontend: #46c26f;
-  --backend: #5ba4ff;
-  --infra: #f472b6;
-  --cs: #e2a33a;
-  --main: #8b909a;
+  --frontend: light-dark(#1f9d55, #46c26f);
+  --backend: light-dark(#2f6fe0, #5ba4ff);
+  --infra: light-dark(#d63f8a, #f472b6);
+  --cs: light-dark(#b7791f, #e2a33a);
+  --main: light-dark(#6f7681, #8b909a);
 
-  --add: rgba(62, 190, 110, 0.22);
-  --del: rgba(255, 90, 90, 0.18);
-  --add-ink: #5ad48a;
-  --del-ink: #ff8080;
+  --add: light-dark(rgba(31, 157, 85, 0.12), rgba(62, 190, 110, 0.22));
+  --del: light-dark(rgba(220, 38, 38, 0.10), rgba(255, 90, 90, 0.18));
+  --add-ink: light-dark(#1f9d55, #5ad48a);
+  --del-ink: light-dark(#d33c3c, #ff8080);
 
-  --syn-keyword: #ff7b9c;
-  --syn-meta: #e2c05a;
-  --syn-title: #79b8ff;
-  --syn-string: #a5d6ff;
-  --syn-comment: #7b808a;
-  --syn-number: #e6a23c;
-  --syn-type: #ffab70;
+  --syn-keyword: light-dark(#c5306a, #ff7b9c);
+  --syn-meta: light-dark(#9a6b00, #e2c05a);
+  --syn-title: light-dark(#1f5fd1, #79b8ff);
+  --syn-string: light-dark(#1a6fb5, #a5d6ff);
+  --syn-comment: light-dark(#6f7681, #7b808a);
+  --syn-number: light-dark(#b45309, #e6a23c);
+  --syn-type: light-dark(#b2501f, #ffab70);
 
   --sans: 'Wanted Sans Variable', 'Wanted Sans', 'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
   --mono: 'Commit Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
-  --pill-ink: white;
+  --pill-ink: light-dark(#16191d, white);
   --topbar-h: 79px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #f7f8fa;
-    --bg-2: #ffffff;
-    --bg-band: #e9ecf1;
-    --line: #dfe3e8;
-    --line-2: #c9ced6;
-    --fg: #16191d;
-    --fg-2: #4b5260;
-    --fg-3: #6f7681;
-
-    --frontend: #1f9d55;
-    --backend: #2f6fe0;
-    --infra: #d63f8a;
-    --cs: #b7791f;
-    --main: #6f7681;
-
-    --add: rgba(31, 157, 85, 0.12);
-    --del: rgba(220, 38, 38, 0.10);
-    --add-ink: #1f9d55;
-    --del-ink: #d33c3c;
-
-    --syn-keyword: #c5306a;
-    --syn-meta: #9a6b00;
-    --syn-title: #1f5fd1;
-    --syn-string: #1a6fb5;
-    --syn-comment: #6f7681;
-    --syn-number: #b45309;
-    --syn-type: #b2501f;
-    --pill-ink: #16191d;
-  }
-}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 
 /* branch colors, one place: every element with data-branch reads --c */
 [data-branch="frontend"] { --c: var(--frontend); }
@@ -127,6 +97,39 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   letter-spacing: -0.02em;
   line-height: 1;
 }
+
+.theme {
+  display: inline-flex;
+  align-items: stretch;
+  height: 27px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--bg-2);
+}
+
+.theme button {
+  appearance: none;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--fg-3);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-ligatures: none;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.theme button:first-child { border-radius: 999px 0 0 999px; }
+.theme button:last-child { border-radius: 0 999px 999px 0; }
+.theme button:hover { color: var(--fg); }
+.theme button[aria-pressed="true"] {
+  background: var(--bg-band);
+  color: var(--fg);
+}
+.theme button:active { transform: translateY(1px); }
 
 
 /* ---------- home: the log ---------- */
@@ -450,6 +453,7 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 /* long tokens (`<producer>/<version>`) must not widen the table past the viewport */
 .post .body td code { font-size: 14px; overflow-wrap: anywhere; }
 
+
 .post .body figure { margin: 0 0 28px; }
 .post .body figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
 .post .body figcaption { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--fg-3); }
@@ -559,6 +563,8 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   :root { --topbar-h: 64px; }
   .topbar { padding: 0 20px; }
   .wordmark { font-size: 24px; }
+  .theme { height: 24px; }
+  .theme button { font-size: 12px; padding: 0 8px; }
 
   .log { grid-template-columns: 1fr; min-height: 0; }
   .graph-pane { padding: 28px 0 24px 16px; }

@@ -35,11 +35,13 @@ Writing `.html` in a link works locally-ish but is wrong for the deployed URLs.
 
 1. Create `posts/<slug>.html` by copying `posts/javascript-proxy.html` (short) or
    `posts/git-worktree.html` (has an in-body figure). Keep the skeleton: `.topbar` (wordmark
-   only, no nav), `main.post-layout > article.post` with `header.post-head` (`p.ref` = branch
+   only; the theme switch is injected by `site.js`), `main.post-layout > article.post` with `header.post-head` (`p.ref` = branch
    tag + empty `span.hash` + `time`, then `h1`, `p.lede`), an optional `figure.cover` between
    the header and the body, `div.body`, `footer.post-foot`, and the empty `nav.toc` after the
    article. Set `<title>… · devgrr</title>`, `<meta name="description">` (one or two sentences;
    the home list reuses it as the summary), and `<link rel="canonical" href="/posts/<slug>" />`.
+   Copy the `devgrr:theme` boot `<script>` from an existing post into `<head>` (before the
+   stylesheet) so a saved theme does not flash the wrong scheme.
    - `p.ref .branch` carries `data-branch="frontend|backend|infra|cs"` and links to
      `/?branch=<name>`. The home graph only draws a lane for branches that have a pill button
      in `ul.branches` (currently frontend, backend, infra); a post on a branch without a pill
@@ -87,9 +89,11 @@ Commit hashes are computed from the slug by JS; there is nothing to maintain.
 
 ## Styling
 
-All CSS lives in `assets/style.css`; pages have no per-page styles. Dark is the default theme
-(`:root`), light overrides sit in `@media (prefers-color-scheme: light)` — add new colors as
-variables in both blocks, never as hardcoded values in a rule. Branch colors are
+All CSS lives in `assets/style.css`; pages have no per-page styles. Dark is the default scene.
+Color tokens use `light-dark(light, dark)` so both schemes live on one declaration; never
+hardcode a color in a rule. `html[data-theme="light"|"dark"]` forces `color-scheme` and the
+toggle persists that in `localStorage` (`devgrr:theme`); without it, `prefers-color-scheme`
+chooses. Branch colors are
 `--frontend / --backend / --infra / --cs / --main` and reach elements through `--c` on any
 `[data-branch]`. Fonts: Wanted Sans Variable (jsDelivr) for text, Commit Mono (fontsource via
 jsDelivr) for code, hashes and the wordmark; both are linked in every page head.
@@ -98,7 +102,7 @@ jsDelivr) for code, hashes and the wordmark; both are linked in every page head.
 
 `assets/site.js` (vanilla, `defer`, one file for both pages) draws the graph from the
 `ol.commits` DOM and the `ul.branches` pills, fills the preview pane, handles hover/focus
-checkout, `j`/`k` keys, the branch filter, code-block rendering, the post TOC with scroll-spy,
+checkout, `j`/`k` keys, the branch filter, the dark/light theme switch, code-block rendering, the post TOC with scroll-spy,
 and reading-position memory. The lanes SVG sits above the rows (`z-index`) so nodes stay
 visible over the HEAD band. Without JS the index is a plain list and posts are plain text.
 

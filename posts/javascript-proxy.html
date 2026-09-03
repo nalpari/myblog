@@ -7,6 +7,12 @@
   <meta name="description" content="속성 읽기, 쓰기, in 검사를 실제로 일어나기 전에 가로채는 Proxy. get, set, has 트랩과 유효성 검사, 기본값, 메모이제이션, 로깅 사례, Reflect와 revocable, 그리고 쓰지 말아야 할 때까지." />
   <link rel="canonical" href="/posts/javascript-proxy" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    try {
+      var t = localStorage.getItem('devgrr:theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />

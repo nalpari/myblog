@@ -7,6 +7,12 @@
   <meta name="description" content="지식을 서비스가 아니라 파일로 다루는 포맷. 마크다운과 YAML 프론트매터에 출처, 신뢰, 유통기한을 적어두는 OKF v0.2의 규칙과 번들 구조, Attested Computation, 도입 로드맵까지 정리합니다." />
   <link rel="canonical" href="/posts/okf-guide" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    try {
+      var t = localStorage.getItem('devgrr:theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />
