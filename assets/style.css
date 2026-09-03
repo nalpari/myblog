@@ -428,6 +428,8 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 }
 
 .post .body h3 { margin: 36px 0 12px; font-size: 20px; font-weight: 600; }
+/* Korean wraps between words, never inside one (h1 uses text-wrap: balance) */
+.post h1, .post .body h2, .post .body h3, .commits .title { word-break: keep-all; }
 
 .post .body :is(ul, ol) { margin: 0 0 22px; padding-left: 24px; }
 .post .body li { margin: 6px 0; }
