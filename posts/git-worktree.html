@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Git worktree 완벽 가이드 · devgrr</title>
+  <meta name="description" content="feature 브랜치 작업 중 main 핫픽스가 터지면 stash 대신 디렉토리를 하나 더 엽니다. git worktree의 원리, 기본 명령, 핫픽스와 리뷰 시나리오, bare 저장소 패턴까지." />
+  <link rel="canonical" href="/posts/git-worktree" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/500.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/700.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="/assets/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/">devgrr</a>
+    <nav aria-label="주요 메뉴">
+      <a href="/">글</a>
+      <a href="/#branches">주제</a>
+      <a href="/#about">소개</a>
+    </nav>
+  </header>
+
+  <main class="post-layout">
+    <article class="post">
+      <header class="post-head">
+        <p class="ref">
+          <a class="branch" data-branch="infra" href="/?branch=infra">infra</a>
+          <span class="hash"></span>
+          <time datetime="2026-03-17">2026-03-17</time>
+        </p>
+        <h1>Git worktree 완벽 가이드</h1>
+        <p class="lede">feature 브랜치에서 작업하다가 main에 급한 버그가 터지면 stash, checkout, 수정, 다시 checkout, stash pop. 이 다섯 단계를 매번 반복하고 있다면 <code>git worktree</code>를 써 볼 때입니다. 저장소 하나를 여러 디렉토리에 동시에 체크아웃하는 기능이고, Git 2.5부터 기본으로 들어 있습니다.</p>
+      </header>
+
+      <div class="body">
+        <h2>매일 겪는 그 불편함</h2>
+        <p>상황을 하나 그려 봅니다. feature 브랜치에서 한창 코드를 고치고 있는데 main에서 긴급 버그가 올라옵니다. 지금까지의 해결법은 둘 중 하나였습니다.</p>
+        <ul>
+          <li><strong>stash 하고 브랜치를 바꾼다.</strong> stash, 전환, 수정, 복귀, stash pop. 단계마다 실수할 곳이 있고, 하던 생각의 흐름이 끊깁니다.</li>
+          <li><strong>프로젝트를 한 번 더 clone 한다.</strong> 디스크는 두 배로 쓰고, 두 저장소를 fetch로 맞춰 주는 일이 하나 더 생깁니다.</li>
+        </ul>
+        <p><code>git worktree</code>는 이 문제를 근본에서 해결합니다. 브랜치를 전환하는 대신 작업 디렉토리를 하나 더 만듭니다.</p>
+
+        <pre class="code diff" data-lang="bash">
+-git stash
+-git checkout main
+-git checkout -b hotfix/critical-bug
+-# ...수정하고 커밋...
+-git checkout feature/new-api
+-git stash pop
++git worktree add ../my-project-hotfix -b hotfix/critical-bug main
++cd ../my-project-hotfix
++# feature 브랜치는 그대로. 작업 디렉토리만 하나 더 생겼다.</pre>
+
+        <h2>git worktree란</h2>
+        <p><code>git worktree</code>는 하나의 Git 저장소를 여러 작업 디렉토리에 동시에 체크아웃하는 기능입니다. Git 2.5(2015년)부터 정식으로 지원하고, 별도 플러그인이 필요 없습니다.</p>
+
+        <table>
+          <thead>
+            <tr><th>용어</th><th>의미</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Main worktree</td><td><code>git clone</code>이나 <code>git init</code>으로 만들어진 최초의 작업 디렉토리</td></tr>
+            <tr><td>Linked worktree</td><td><code>git worktree add</code>로 추가한, 연결된 작업 디렉토리</td></tr>
+            <tr><td><code>.git</code> 디렉토리</td><td>저장소의 실제 데이터가 있는 곳. linked worktree는 이것을 공유한다</td></tr>
+          </tbody>
+        </table>
+
+        <figure>
+          <picture>
+            <source srcset="/assets/posts/git-worktree-shared-git-dark.webp" media="(prefers-color-scheme: dark)" />
+            <img src="/assets/posts/git-worktree-shared-git-light.webp" alt="my-project, my-project-hotfix, my-project-feature 세 디렉토리가 하나의 .git 저장소 데이터를 공유하는 구조" width="1600" height="570" loading="lazy" />
+          </picture>
+          <figcaption>디렉토리는 셋이지만 저장소 데이터는 하나입니다. linked worktree의 <code>.git</code>은 main worktree를 가리키는 포인터입니다.</figcaption>
+        </figure>
+
+        <pre class="code" data-lang="text">
+my-project/               ← main worktree (main 브랜치)
+├── .git/                 ← 실제 저장소 데이터 (공유됨)
+│   └── worktrees/        ← linked worktree 메타데이터
+├── src/
+└── ...
+
+../my-project-hotfix/     ← linked worktree (hotfix 브랜치)
+├── .git                  ← 디렉토리가 아니라 파일 하나 (포인터)
+├── src/
+└── ...
+
+../my-project-feature/    ← linked worktree (feature 브랜치)
+├── .git                  ← 디렉토리가 아니라 파일 하나 (포인터)
+├── src/
+└── ...</pre>
+
+        <p>linked worktree의 <code>.git</code>은 디렉토리가 아니라 파일 하나입니다. 열어 보면 한 줄뿐입니다.</p>
+
+        <pre class="code" data-lang="text" data-file="../my-project-hotfix/.git">
+gitdir: /path/to/my-project/.git/worktrees/my-project-hotfix</pre>
+
+        <p>main worktree의 <code>.git</code> 디렉토리를 가리키는 포인터라서 Git 객체는 중복 없이 공유됩니다. 한쪽에서 fetch한 원격 브랜치를 다른 worktree에서 바로 쓸 수 있는 이유입니다.</p>
+
+        <h3>기존 방법과 비교</h3>
+        <table>
+          <thead>
+            <tr><th>방법</th><th>브랜치 전환</th><th>디스크 사용</th><th>동시 작업</th><th>히스토리 공유</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>브랜치 전환 (<code>checkout</code>)</td><td>매번</td><td>낮음</td><td>불가</td><td>공유</td></tr>
+            <tr><td>프로젝트 재clone</td><td>필요 없음</td><td>매우 높음</td><td>가능</td><td>분리</td></tr>
+            <tr><td><strong>git worktree</strong></td><td>필요 없음</td><td>낮음</td><td>가능</td><td>공유</td></tr>
+          </tbody>
+        </table>
+
+        <h2>기본 사용법</h2>
+        <h3>추가하기</h3>
+        <pre class="code" data-lang="bash">
+# 기본 문법
+git worktree add &lt;경로&gt; [&lt;브랜치&gt;]
+
+# 예시 1: 기존 브랜치를 새 디렉토리에 체크아웃
+git worktree add ../my-project-hotfix hotfix/login-bug
+
+# 예시 2: 새 브랜치를 만들면서 추가 (-b)
+git worktree add -b feature/new-api ../my-project-feature main
+
+# 예시 3: 특정 커밋으로 체크아웃 (detached HEAD)
+git worktree add ../my-project-review abc1234</pre>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">git worktree add</span></p>
+          <p>이미 다른 worktree에서 체크아웃 중인 브랜치는 또 체크아웃할 수 없습니다. 같은 브랜치를 두 곳에서 동시에 고치면 충돌이 나기 때문에 Git이 원천 차단합니다. <code>fatal: 'main' is already checked out</code>이 뜨면 이 경우입니다.</p>
+        </aside>
+
+        <h3>목록 보기</h3>
+        <pre class="code" data-lang="bash">
+git worktree list</pre>
+
+        <pre class="code" data-lang="text">
+~/projects/my-project           abc1234 [main]
+~/projects/my-project-hotfix    def5678 [hotfix/login-bug]
+~/projects/my-project-feature   ghi9012 [feature/new-api]</pre>
+
+        <p>스크립트에서 파싱할 때는 <code>--porcelain</code>을 붙입니다. 한 줄에 한 항목, 필드가 고정된 형태로 나옵니다.</p>
+
+        <pre class="code" data-lang="bash">
+git worktree list --porcelain</pre>
+
+        <h3>제거하기</h3>
+        <pre class="code" data-lang="bash">
+# 권장: git 명령으로 제거 (메타데이터도 같이 정리된다)
+git worktree remove ../my-project-hotfix
+
+# 수정된 파일이 있어도 강제 삭제
+git worktree remove --force ../my-project-hotfix
+
+# 디렉토리를 손으로 지웠다면, 남은 메타데이터 정리
+git worktree prune</pre>
+
+        <p><code>rm -rf</code>로 디렉토리를 직접 지웠다면 반드시 <code>git worktree prune</code>을 실행해서 <code>.git/worktrees/</code> 안에 남은 고아 메타데이터를 청소해야 합니다. 안 하면 그 브랜치가 계속 "체크아웃 중"으로 잡혀 있습니다.</p>
+
+        <h3>잠그기</h3>
+        <p>외장 드라이브처럼 마운트가 일시적으로 풀릴 수 있는 경로에 worktree가 있다면, <code>prune</code>이 그것을 사라진 worktree로 오해하지 않도록 잠가 둡니다.</p>
+        <pre class="code" data-lang="bash">
+git worktree lock ../my-project-hotfix --reason "외장 드라이브에 위치"
+git worktree unlock ../my-project-hotfix</pre>
+
+        <h2>실전 시나리오</h2>
+        <h3>긴급 핫픽스 대응</h3>
+        <pre class="code" data-lang="bash">
+# feature 브랜치에서 작업 중. stash 없이 바로 핫픽스 디렉토리를 만든다
+git worktree add ../my-project-hotfix -b hotfix/critical-bug main
+
+# 새 터미널 탭이나 새 에디터 창에서 핫픽스 디렉토리를 연다
+cd ../my-project-hotfix
+
+# 버그 수정, 커밋, 푸시
+vim src/auth/login.ts
+git add .
+git commit -m "fix: 로그인 토큰 만료 처리 누락 수정"
+git push origin hotfix/critical-bug
+
+# 핫픽스가 끝나면 worktree 제거
+cd ../my-project
+git worktree remove ../my-project-hotfix</pre>
+        <p>이 과정에서 feature 브랜치의 작업은 파일 하나 건드리지 않습니다.</p>
+
+        <h3>코드 리뷰와 동시 개발</h3>
+        <pre class="code" data-lang="bash">
+# PR 리뷰용 worktree
+git worktree add ../my-project-review feature/teammate-pr
+
+cd ../my-project-review
+npm run dev   # 3001 포트에서 리뷰 대상 실행
+
+# 동시에 main worktree에서 내 작업 계속
+cd ../my-project
+npm run dev   # 3000 포트에서 내 작업 실행</pre>
+        <p>dev 서버 두 개를 동시에 띄워 놓고 직접 비교하면서 리뷰할 수 있습니다.</p>
+
+        <h3>장기 릴리즈 브랜치 관리</h3>
+        <pre class="code" data-lang="bash">
+# v1.x 유지보수 브랜치를 상시 열어 둔다
+git worktree add ../my-project-v1 release/v1.x
+
+# 필요할 때 언제든 패치
+cd ../my-project-v1
+git cherry-pick &lt;커밋해시&gt;   # main의 버그픽스를 v1에 적용</pre>
+
+        <h3>빌드와 배포 파이프라인</h3>
+        <pre class="code" data-lang="bash">
+git worktree add ../my-project-staging staging
+git worktree add ../my-project-prod main
+
+# 병렬 빌드
+(cd ../my-project-staging &amp;&amp; npm run build) &amp;
+(cd ../my-project-prod &amp;&amp; npm run build) &amp;
+wait</pre>
+
+        <h2>팀에 도입하기</h2>
+        <h3>디렉토리 컨벤션 정하기</h3>
+        <p>첫 번째 패턴은 프로젝트명 뒤에 용도를 붙이는 방식입니다. 가장 단순하고, 지금 당장 시작할 수 있습니다.</p>
+        <pre class="code" data-lang="text">
+~/projects/
+├── my-project/           ← main worktree
+├── my-project-hotfix/    ← 핫픽스용
+├── my-project-review/    ← PR 리뷰용
+└── my-project-exp/       ← 실험용</pre>
+        <p>두 번째 패턴은 프로젝트 폴더 안에 worktree를 모으는 방식입니다. bare 저장소를 써야 하고, 아래에서 따로 다룹니다.</p>
+        <pre class="code" data-lang="text">
+~/projects/my-project/
+├── .bare/               ← bare 저장소 (실제 Git 데이터)
+├── main/                ← main worktree
+├── hotfix/              ← hotfix worktree
+└── feature-x/           ← feature worktree</pre>
+
+        <h3>.gitignore</h3>
+        <p>worktree 디렉토리 자체는 Git 추적 대상이 아니므로 <code>.gitignore</code>에 넣을 것이 없습니다.</p>
+
+        <h3>.env 파일</h3>
+        <p>각 worktree는 독립된 파일 시스템 위에 있습니다. <code>.env</code>가 main worktree에만 있다면 linked worktree에는 없습니다.</p>
+        <pre class="code" data-lang="bash">
+# 방법 1: 심볼릭 링크
+ln -s ../my-project/.env ../my-project-hotfix/.env
+
+# 방법 2: 공유 경로 참조 (.env.shared 같은 파일을 따로 관리)
+# 방법 3: worktree마다 별도 .env 생성</pre>
+
+        <h3>node_modules</h3>
+        <p><code>node_modules</code>도 worktree마다 따로 존재합니다.</p>
+        <pre class="code" data-lang="bash">
+# 해결책 1: 심볼릭 링크 (패키지 버전이 같을 때만)
+ln -s ../my-project/node_modules ../my-project-hotfix/node_modules
+
+# 해결책 2: pnpm (하드링크 기반 글로벌 캐시로 디스크 중복을 크게 줄인다)
+
+# 해결책 3: 그냥 각각 npm install
+# 브랜치마다 패키지 버전이 다를 수 있으니 이게 가장 안전하다</pre>
+
+        <h2>심화: bare 저장소 방식</h2>
+        <p>일반적인 <code>git clone</code> 대신 bare 저장소로 시작하면 worktree들이 프로젝트 폴더 하나 안에 깔끔하게 모입니다.</p>
+        <pre class="code" data-lang="bash">
+# 1. 프로젝트 폴더 생성
+mkdir my-project &amp;&amp; cd my-project
+
+# 2. bare clone (--bare는 작업 파일 없이 .git 데이터만 받는다)
+git clone --bare git@github.com:my-org/my-project.git .bare
+
+# 3. .git 파일 생성 (일반 git 명령이 bare 저장소를 인식하게)
+echo "gitdir: ./.bare" &gt; .git
+
+# 4. 원격 브랜치 fetch 설정 (bare clone은 기본 fetch 설정이 없다)
+git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+git fetch
+
+# 5. 이제 worktree 추가
+git worktree add main main
+git worktree add feature feature/new-api</pre>
+
+        <pre class="code" data-lang="text">
+my-project/
+├── .bare/         ← 실제 Git 데이터
+├── .git           ← "gitdir: ./.bare" 한 줄짜리 파일
+├── main/          ← main 브랜치 worktree
+└── feature/       ← feature 브랜치 worktree</pre>
+
+        <p>bare 방식이 좋은 이유는 세 가지입니다.</p>
+        <ul>
+          <li><strong>명확한 구조.</strong> 프로젝트 디렉토리 안에 모든 worktree가 모여 있어 관리가 쉽습니다.</li>
+          <li><strong>IDE 친화적.</strong> VS Code, IntelliJ에서 프로젝트 루트를 하나로 잡을 수 있습니다.</li>
+          <li><strong>스크립트화 쉬움.</strong> 경로가 예측 가능합니다.</li>
+        </ul>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">.bare</span></p>
+          <p>4번 단계를 빼먹는 실수가 잦습니다. <code>--bare</code>로 받은 저장소는 <code>origin/*</code> 추적 브랜치를 만들지 않아서, fetch 설정을 넣기 전까지 <code>git worktree add feature feature/new-api</code>가 "브랜치를 찾을 수 없다"고 합니다.</p>
+        </aside>
+
+        <h2>팁과 주의사항</h2>
+        <h3>쉘 함수로 자동화</h3>
+        <p><code>.zshrc</code>나 <code>.bashrc</code>에 넣어 둡니다. 브랜치 이름의 <code>/</code>를 <code>-</code>로 바꿔 디렉토리 이름을 만듭니다.</p>
+        <pre class="code" data-lang="bash" data-file="~/.zshrc">
+function gwt() {
+  local branch=$1
+  local path="../$(basename $(pwd))-${branch//\//-}"
+  git worktree add "$path" "$branch"
+  echo "worktree created at: $path"
+  echo "  cd $path"
+}
+
+# 사용법
+gwt hotfix/login-bug
+# → ../my-project-hotfix-login-bug 에 worktree 생성</pre>
+
+        <h3>fzf로 빠르게 이동</h3>
+        <pre class="code" data-lang="bash" data-file="~/.zshrc">
+function gwtcd() {
+  local worktree
+  worktree=$(git worktree list | fzf | awk '{print $1}')
+  [ -n "$worktree" ] &amp;&amp; cd "$worktree"
+}</pre>
+
+        <h3>VS Code에서 여러 worktree 열기</h3>
+        <pre class="code" data-lang="bash">
+# 각 worktree를 새 창으로
+code ../my-project-hotfix
+
+# 현재 창에 폴더로 추가 (멀티루트 워크스페이스)
+# File > Add Folder to Workspace</pre>
+
+        <h3>주의할 것 네 가지</h3>
+        <ol>
+          <li><strong>같은 브랜치는 중복 체크아웃이 안 됩니다.</strong> <code>git worktree add ../another-main main</code>은 <code>fatal: 'main' is already checked out</code>으로 실패합니다.</li>
+          <li><strong>stash 목록은 공유되지만 pop은 현재 worktree에 적용됩니다.</strong> stash는 <code>.git/refs/stash</code>에 저장되므로 어느 worktree에서든 <code>git stash list</code>로 보입니다. 단, <code>git stash pop</code>은 지금 있는 worktree의 파일에 풀립니다.</li>
+          <li><strong>git hooks는 공유됩니다.</strong> <code>.git/hooks/</code>가 하나이므로 pre-commit, pre-push 같은 훅이 모든 worktree에 똑같이 적용됩니다.</li>
+          <li><strong>서브모듈은 worktree마다 초기화해야 합니다.</strong> 새 worktree에서 <code>git submodule update --init --recursive</code>를 한 번 실행하세요.</li>
+        </ol>
+
+        <h2>같이 쓰면 좋은 도구</h2>
+        <h3>tmux</h3>
+        <p>worktree마다 창을 하나씩 두면 한 화면에서 네 브랜치를 동시에 봅니다.</p>
+        <pre class="code" data-lang="text">
+┌─────────────────────┬─────────────────────┐
+│ my-project (main)   │ my-project-hotfix   │
+│ $ npm run dev       │ $ git log --oneline │
+├─────────────────────┼─────────────────────┤
+│ my-project-feature  │ my-project-review   │
+│ $ vim src/api.ts    │ $ npm test          │
+└─────────────────────┴─────────────────────┘</pre>
+
+        <h3>lazygit</h3>
+        <p><code>lazygit</code>은 <code>git worktree list</code>를 UI로 보여 주고 worktree 사이를 쉽게 오가는 TUI 클라이언트입니다.</p>
+
+        <h3>direnv</h3>
+        <p>worktree 디렉토리마다 다른 환경변수를 자동으로 설정할 수 있습니다.</p>
+        <pre class="code" data-lang="bash" data-file="my-project-hotfix/.envrc">
+export NODE_ENV=production
+export PORT=3001</pre>
+
+        <h2>자주 묻는 질문</h2>
+        <h3>worktree는 몇 개까지 만들 수 있나요</h3>
+        <p>기술적인 제한은 없습니다. 다만 worktree마다 에디터, dev 서버, 빌드 프로세스가 메모리를 쓰므로 실용적으로는 2개에서 5개 정도가 적당합니다.</p>
+
+        <h3>다른 머신에서도 쓸 수 있나요</h3>
+        <p>worktree 메타데이터는 <code>.git/worktrees/</code>에 절대 경로로 저장되므로 다른 머신에서 그대로 쓸 수는 없습니다. 머신마다 <code>git worktree add</code>를 따로 실행해야 합니다.</p>
+
+        <h3>detached HEAD 상태의 worktree는 어떻게 관리하나요</h3>
+        <p>특정 커밋이나 태그를 체크아웃하면 detached HEAD가 됩니다. 이후 변경을 남기려면 <code>git checkout -b &lt;새브랜치명&gt;</code>으로 브랜치를 만들어야 합니다.</p>
+
+        <h3>submodule과는 다른 건가요</h3>
+        <p>완전히 다른 개념입니다. submodule은 다른 저장소를 현재 저장소 안에 포함시키는 것이고, worktree는 같은 저장소를 여러 경로에서 동시에 작업하게 하는 것입니다.</p>
+
+        <h2>마치며</h2>
+        <p><code>git worktree</code>에는 분명 러닝 커브가 있습니다. 처음엔 "그냥 stash 쓰면 되지 않나" 싶습니다. 하지만 한 번 손에 익으면 브랜치 전환 때문에 치르던 컨텍스트 스위칭 비용이 얼마나 컸는지 실감하게 됩니다. 특히 이런 상황에서 효과가 큽니다.</p>
+        <ul>
+          <li><strong>핫픽스가 잦은 서비스.</strong> stash 없이 즉시 대응합니다.</li>
+          <li><strong>빌드가 오래 걸리는 프로젝트.</strong> 다른 worktree에서 빌드하는 동안 지금 작업을 계속합니다.</li>
+          <li><strong>여러 버전을 동시에 유지보수할 때.</strong> v1, v2, main을 한 저장소에서 병렬로 관리합니다.</li>
+          <li><strong>리뷰 중에도 내 작업을 계속해야 할 때.</strong> 두 브랜치를 동시에 실행합니다.</li>
+        </ul>
+        <p>도입 순서를 제안하면 이렇습니다.</p>
+        <ol>
+          <li><code>git worktree add</code>와 <code>git worktree remove</code>만 먼저 익힙니다.</li>
+          <li>핫픽스 상황에서 실제로 한 번 써 봅니다.</li>
+          <li>bare 저장소 방식으로 전환을 고려합니다.</li>
+          <li>팀과 디렉토리 컨벤션을 맞춥니다.</li>
+        </ol>
+        <p>지금 터미널을 열고 한 줄만 쳐 보세요.</p>
+        <pre class="code" data-lang="bash">
+git worktree add ../$(basename $(pwd))-hotfix -b hotfix/my-first-worktree main</pre>
+      </div>
+
+      <footer class="post-foot">
+        <a href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>목록으로</a>
+      </footer>
+    </article>
+
+    <nav class="toc" aria-label="목차"></nav>
+  </main>
+</body>
+</html>

@@ -449,6 +449,10 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 .post .body th { color: var(--fg-3); font-weight: 500; }
 .post .body td code { font-size: 14px; }
 
+.post .body figure { margin: 0 0 28px; }
+.post .body figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+.post .body figcaption { margin-top: 10px; font-size: 14.5px; line-height: 1.6; color: var(--fg-3); }
+
 /* the senior's note: a review comment on the commit */
 .review {
   margin: 32px 0;
@@ -579,6 +583,8 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
   .post .body h2 { font-size: 22px; margin-top: 44px; }
   .code { font-size: 14px; line-height: 20px; padding: 20px 10px 18px; margin: 22px 0; }
   .code[data-file] { padding-top: 40px; }
+  .post .body figure { overflow-x: auto; }
+  .post .body figure img { min-width: 640px; }
   .ln { grid-template-columns: 26px 22px 1fr; margin: 0 -10px; padding: 0 10px; }
   .code:not(.diff) .ln { grid-template-columns: 26px 1fr; }
   .site-foot { padding: 28px 20px 40px; }

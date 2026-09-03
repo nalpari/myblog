@@ -40,6 +40,20 @@
         <svg class="lanes" aria-hidden="true"></svg>
         <!-- 새 글은 이 목록의 맨 위에 추가한다. 맨 아래 항목이 그래프의 루트다. -->
         <ol class="commits" reversed>
+          <li data-branch="infra" data-slug="git-worktree" data-head>
+            <a href="/posts/git-worktree"><span class="title">Git worktree 완벽 가이드</span></a>
+            <p class="summary">feature 브랜치 작업 중 main 핫픽스가 터지면 stash 대신 디렉토리를 하나 더 엽니다. 원리, 기본 명령, 실전 시나리오, bare 저장소 패턴까지.</p>
+            <pre class="snippet diff" data-lang="bash" hidden>
+-git stash
+-git checkout main
+-git checkout -b hotfix/critical-bug
+-# ...수정하고 커밋...
+-git checkout feature/new-api
+-git stash pop
++git worktree add ../my-project-hotfix -b hotfix/critical-bug main
++cd ../my-project-hotfix
++# feature 브랜치는 그대로. 작업 디렉토리만 하나 더 생겼다.</pre>
+          </li>
           <li data-branch="frontend" data-slug="react-when-render">
             <a href="/posts/react-when-render"><span class="title">React 렌더링은 언제 일어나는가</span></a>
             <p class="summary">"state가 바뀌면 다시 그린다"는 절반만 맞는 말입니다. 부모의 렌더링, context, 그리고 React가 렌더링을 건너뛰는 조건까지 실제 코드로 따라가 봅니다.</p>
@@ -55,7 +69,7 @@ function Parent() {
   );
 }</pre>
           </li>
-          <li data-branch="backend" data-slug="spring-transaction-propagation" data-head>
+          <li data-branch="backend" data-slug="spring-transaction-propagation">
             <a href="/posts/spring-transaction-propagation"><span class="title">Spring 트랜잭션 전파</span></a>
             <p class="summary">Spring의 트랜잭션 전파 속성은 트랜잭션이 어떻게 동작할지를 제어하는 중요한 설정입니다. 특히 여러 트랜잭션이 중첩될 때의 동작 방식을 이해하는 것이 중요합니다.</p>
             <pre class="snippet diff" data-lang="java" hidden>
