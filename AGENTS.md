@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-devgrr: a hand-written static tech blog in Korean (`lang="ko"`) for junior developers, deployed
+devgrr: a hand-written static tech blog in Korean (`lang="ko"`) for developers, deployed
 on Vercel. No build step, no package manager, no tests, no framework. Files are served as-is.
 The home page draws the post list as a git commit graph (`git log --graph`): each post is a
 commit on its topic branch, merged into `main`. Product truth lives in `PRODUCT.md`, the visual
@@ -26,46 +26,64 @@ to `posts/x.html` also works for a quick check.
 
 ## Routing contract
 
-`vercel.json` sets `cleanUrls: true` and `trailingSlash: false`. So `posts/hello-world.html`
-is served at `/posts/hello-world`. Every `href`, `<link rel="canonical">`, and stylesheet path
-must be **absolute and extensionless** (`/posts/hello-world`, `/assets/style.css`).
+`vercel.json` sets `cleanUrls: true` and `trailingSlash: false`. So `posts/git-worktree.html`
+is served at `/posts/git-worktree`. Every `href`, `<link rel="canonical">`, and stylesheet path
+must be **absolute and extensionless** (`/posts/git-worktree`, `/assets/style.css`).
 Writing `.html` in a link works locally-ish but is wrong for the deployed URLs.
 
 ## Adding a post
 
-There is no index generator. Three manual edits, all required:
-
-1. Create `posts/<slug>.html` by copying `posts/spring-transaction-propagation.html`
-   (full-featured) or `posts/hello-world.html` (minimal). Keep the skeleton: `.topbar`,
-   `main.post-layout > article.post` with `header.post-head` (`p.ref` = branch tag + empty
-   `span.hash` + `time`, then `h1`, `p.lede`), `div.body`, `footer.post-foot`, and the empty
-   `nav.toc` after the article. Set `<title>… · devgrr</title>`, `<meta name="description">`,
-   and `<link rel="canonical" href="/posts/<slug>" />`.
+1. Create `posts/<slug>.html` by copying `posts/javascript-proxy.html` (short) or
+   `posts/git-worktree.html` (has an in-body figure). Keep the skeleton: `.topbar` (wordmark
+   only, no nav), `main.post-layout > article.post` with `header.post-head` (`p.ref` = branch
+   tag + empty `span.hash` + `time`, then `h1`, `p.lede`), an optional `figure.cover` between
+   the header and the body, `div.body`, `footer.post-foot`, and the empty `nav.toc` after the
+   article. Set `<title>… · devgrr</title>`, `<meta name="description">` (one or two sentences;
+   the home list reuses it as the summary), and `<link rel="canonical" href="/posts/<slug>" />`.
    - `p.ref .branch` carries `data-branch="frontend|backend|infra|cs"` and links to
-     `/?branch=<name>` (the home page lands filtered on that branch).
-   - Delete `<span class="sample">예시 글</span>` for real posts; the shipped example posts
-     carry it because their content is synthetic.
-2. Add an `<li>` at the **top** of `ol.commits` in `index.html` with `data-branch`,
-   `data-slug` (= file name), `<a href="/posts/<slug>"><span class="title">…</span></a>`,
-   a `<p class="summary">` (one or two sentences; shown in the preview pane and on mobile), and
-   optionally `<pre class="snippet [diff]" data-lang="…" hidden>` with 5-15 lines for the
-   preview pane. The **last** `<li>` (`hello-world`, `data-branch="main"`) is the graph root;
-   leave it last.
-3. Optional: `data-head` on one `<li>` pins the post shown in the preview on a first visit.
-   After a visitor reads a post, that post becomes HEAD for them (localStorage).
+     `/?branch=<name>`. The home graph only draws a lane for branches that have a pill button
+     in `ul.branches` (currently frontend, backend, infra); a post on a branch without a pill
+     lands on the trunk. To bring `cs` back, restore its pill: the color variable and filter
+     rule are still in place.
+2. Register it in `index.html`. If `.claude/skills/ingest/scripts/ingest.py` is present
+   (it is gitignored as a local skill), run it from the repo root: a dry run prints the plan,
+   `--write` applies it and validates, `--check` validates only. It adds an `<li>` at the top of
+   `ol.commits` for every post file missing from the list, removes entries whose file is gone,
+   leaves existing entries byte-for-byte alone, keeps a `main` entry last, and toggles the
+   dockerfile highlighter script. Review the new entry's title (one line; long titles are cut
+   at `:`) and its snippet. Without the script, add the `<li>` by hand:
+   `data-branch`, `data-slug` (= file name), `<a href="/posts/<slug>"><span class="title">…
+   </span></a>`, `<p class="summary">`, and optionally `<pre class="snippet [diff]"
+   data-lang="…" [data-file="…"] hidden>` with 5-15 lines, none wider than about 62 columns
+   (longer lines clip in the preview pane with no scroll affordance; fold shell lines with `\`).
+3. Ordering: newest at the top. An entry with `data-branch="main"` is the graph root and must
+   stay last; when there is none, `site.js` draws a grey virtual root below the list. Optional:
+   `data-head` on one `<li>` pins the post shown in the preview on a first visit; otherwise the
+   top row is HEAD. After a visitor reads a post, that post becomes HEAD for them (localStorage).
 
 Commit hashes are computed from the slug by JS; there is nothing to maintain.
 
 ## Content conventions
 
 - Code: `<pre class="code" data-lang="java" data-file="Foo.java">` with raw text, `<` escaped
-  as `&lt;`. Add class `diff` and prefix lines with `+` / `-` for diffs (`@@` lines render as
-  hunk headers). Colors come from highlight.js (cdnjs) at runtime; `dockerfile` needs the extra
-  language script (see `posts/docker-image-diet.html`). Blocks render as plain `<pre>` without JS.
+  as `&lt;` and `&` as `&amp;`. Add class `diff` and prefix lines with `+` / `-` for diffs (`@@`
+  lines render as hunk headers). Colors come from highlight.js (cdnjs) at runtime; `dockerfile`
+  is not in the default bundle, so a page whose blocks use it also loads
+  `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dockerfile.min.js`.
+  Languages hljs lacks (`prisma`) render as plain text. Use `data-lang="text"` for ASCII trees.
 - The senior's note: `<aside class="review"><p class="review-head"><b>devgrr</b> 리뷰 코멘트
   <span class="hash">File.java:12</span></p><p>…</p></aside>`.
-- Sections are `h2` (the TOC is built from them); use `h3` inside a section.
-- Dates are `<time datetime="YYYY-MM-DD">`. Never invent metrics or testimonials (`PRODUCT.md`).
+- Cover image: `<figure class="cover"><img src="/assets/posts/<slug>-cover.webp" width="1600"
+  height="900" fetchpriority="high" alt="…"></figure>` right after `header.post-head`. Covers
+  are flat diagrams on the dark ground in the post's branch color, 16:9, webp at 1600×900.
+- In-body figures: `<figure><picture><source srcset="…-dark.webp" media="(prefers-color-scheme:
+  dark)"><img src="…-light.webp" width height loading="lazy" alt="…"></picture><figcaption>…
+  </figcaption></figure>`, both files the same size. Images live in `assets/posts/`.
+- Sections are `h2` (the TOC is built from them); use `h3` inside a section. Headings and list
+  titles use `word-break: keep-all`, so Korean never breaks inside a word.
+- Dates are `<time datetime="YYYY-MM-DD">` (`YYYY-MM` when the source only has a month).
+  Never invent metrics or testimonials (`PRODUCT.md`).
+- Voice: 합니다체, no emoji, no em dashes. Code and technical terms stay in English.
 
 ## Styling
 
@@ -79,9 +97,10 @@ jsDelivr) for code, hashes and the wordmark; both are linked in every page head.
 ## JS
 
 `assets/site.js` (vanilla, `defer`, one file for both pages) draws the graph from the
-`ol.commits` DOM, fills the preview pane, handles hover/focus checkout, `j`/`k` keys, the
-branch filter, code-block rendering, the post TOC with scroll-spy, and reading-position memory.
-Without JS the index is a plain list and posts are plain text.
+`ol.commits` DOM and the `ul.branches` pills, fills the preview pane, handles hover/focus
+checkout, `j`/`k` keys, the branch filter, code-block rendering, the post TOC with scroll-spy,
+and reading-position memory. The lanes SVG sits above the rows (`z-index`) so nodes stay
+visible over the HEAD band. Without JS the index is a plain list and posts are plain text.
 
 ## Design hooks
 
