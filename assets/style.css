@@ -447,7 +447,8 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 .post .body table { width: 100%; border-collapse: collapse; margin: 0 0 28px; font-size: 16px; }
 .post .body th, .post .body td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
 .post .body th { color: var(--fg-3); font-weight: 500; }
-.post .body td code { font-size: 14px; }
+/* long tokens (`<producer>/<version>`) must not widen the table past the viewport */
+.post .body td code { font-size: 14px; overflow-wrap: anywhere; }
 
 .post .body figure { margin: 0 0 28px; }
 .post .body figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
