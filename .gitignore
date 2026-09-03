@@ -1,2 +1,9 @@
 .DS_Store
 .vercel
+
+# 벤더링된 에이전트 스킬 (skills-lock.json 으로 재설치)
+.agents/skills/
+.claude/skills/
+
+# 로컬 전용 설정
+*.local.json
