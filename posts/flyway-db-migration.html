@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flyway 도입 가이드 · devgrr</title>
+  <meta name="description" content="DB 스키마를 손으로 고치는 팀이 Flyway로 넘어가는 과정. 마이그레이션 파일 규칙, Spring Boot 연결, 이미 운영 중인 DB에 baseline 잡기, 팀 규칙과 실전 함정까지 정리합니다." />
+  <link rel="canonical" href="/posts/flyway-db-migration" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <script>
+    try {
+      var t = localStorage.getItem('devgrr:theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/wanteddev/wanted-sans@v1.0.3/packages/wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/index.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/500.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.3.0/700.css" />
+  <link rel="stylesheet" href="/assets/style.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="/assets/site.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="wordmark" href="/">devgrr</a>
+  </header>
+
+  <main class="post-layout">
+    <article class="post">
+      <header class="post-head">
+        <p class="ref">
+          <a class="branch" data-branch="backend" href="/?branch=backend">backend</a>
+          <span class="hash"></span>
+          <time datetime="2026-09-03">2026-09-03</time>
+        </p>
+        <h1>Flyway 도입 가이드: 이미 돌아가는 DB에 버전 관리를 얹는 법</h1>
+        <p class="lede">애플리케이션 코드는 git으로 관리하면서 DB 스키마는 아직도 누군가 콘솔에서 <code>ALTER TABLE</code>을 칩니다. Flyway는 그 SQL을 파일로 만들고, 순서대로 한 번씩만 실행하고, 무엇을 실행했는지 DB 안에 적어 둡니다. 빈 DB가 아니라 이미 운영 중인 DB에 도입하는 경우까지 다룹니다.</p>
+      </header>
+
+      <figure class="cover">
+        <img src="/assets/posts/flyway-db-migration-cover.webp" alt="V1, V2, V3 마이그레이션 파일이 한 줄의 타임라인 위에 순서대로 놓이고, 그 끝이 flyway_schema_history 테이블로 이어지는 그림" width="1600" height="900" fetchpriority="high" />
+      </figure>
+
+      <div class="body">
+        <h2>DB 스키마도 코드입니다</h2>
+        <p>새 기능을 만들면서 컬럼 하나를 추가한다고 해 봅시다. 로컬 DB에서 <code>ALTER TABLE users ADD COLUMN phone VARCHAR(20)</code>을 실행하고, 코드를 짜고, PR을 올립니다. 리뷰가 끝나고 배포합니다. 그리고 운영 서버가 <code>Unknown column 'phone'</code>으로 죽습니다.</p>
+        <p>누군가 스테이징과 운영 DB에도 같은 SQL을 쳐야 했는데, 그 사실이 코드 어디에도 적혀 있지 않았기 때문입니다. 이 문제는 팀이 커질수록 다음 형태로 나타납니다.</p>
+        <ul>
+          <li><strong>환경마다 스키마가 다릅니다.</strong> 로컬, 개발, 스테이징, 운영이 조금씩 어긋나고, 어디가 어떻게 다른지 아무도 모릅니다.</li>
+          <li><strong>신규 입사자가 DB를 못 만듭니다.</strong> 최신 스키마를 만들려면 선배에게 덤프 파일을 받아야 합니다. 그 덤프가 언제 것인지는 아무도 모릅니다.</li>
+          <li><strong>배포 순서가 사람 머릿속에 있습니다.</strong> "이번 배포는 SQL 먼저 치고 앱 올리세요"가 슬랙 메시지로 전달됩니다. 새벽 배포에서 이 메시지는 잊힙니다.</li>
+        </ul>
+        <p>코드에는 이런 문제가 없습니다. git이 변경 이력을 순서대로 갖고 있고, 어떤 커밋이 배포되었는지 알 수 있고, 새 사람은 <code>clone</code> 한 번으로 최신 상태를 받습니다. Flyway는 이것을 DB 스키마에 그대로 적용하는 도구입니다.</p>
+
+        <h3>ddl-auto: update는 답이 아닙니다</h3>
+        <p>Spring Boot를 쓴다면 <code>spring.jpa.hibernate.ddl-auto: update</code>가 떠오를 수 있습니다. 엔티티 클래스를 고치면 Hibernate가 알아서 테이블을 바꿔 주니 편합니다. 하지만 운영 환경에서는 쓰면 안 됩니다.</p>
+        <ul>
+          <li>컬럼을 <strong>추가</strong>할 뿐, 이름을 바꾸거나 지우는 변경은 반영하지 않습니다. 스키마에 쓰레기가 쌓입니다.</li>
+          <li>어떤 DDL이 실행될지 <strong>배포 전에 알 수 없습니다.</strong> 리뷰할 대상이 없습니다.</li>
+          <li>인덱스, 제약 조건, 데이터 이관 같은 <strong>실제로 중요한 변경을 표현할 수 없습니다.</strong></li>
+        </ul>
+        <p>Flyway를 도입하면 이 값은 <code>validate</code>로 바뀝니다. Hibernate는 스키마를 고치는 대신, 엔티티와 실제 테이블이 맞는지만 검사하고 어긋나면 애플리케이션을 띄우지 않습니다. 스키마를 바꾸는 권한은 Flyway 한 곳으로 모입니다.</p>
+
+        <h2>Flyway가 하는 일</h2>
+        <p>Flyway는 Redgate가 관리하는 DB 마이그레이션 도구입니다. 하는 일은 한 문장으로 요약됩니다.</p>
+        <p><strong>버전이 붙은 SQL 파일을 버전 순서대로 한 번씩만 실행하고, 무엇을 실행했는지 DB 안의 테이블에 기록합니다.</strong></p>
+        <p>핵심은 마지막 절반입니다. 기록이 DB 안에 있기 때문에, Flyway는 어떤 환경에 붙어도 "이 DB는 지금 몇 번까지 적용되었는가"를 스스로 알아냅니다. 사람의 기억이나 슬랙 메시지가 필요 없습니다.</p>
+
+        <pre class="code" data-lang="text">
+db/migration/                     운영 DB
+├── V1__create_users.sql          ┌──────────────────────┐
+├── V2__add_phone.sql      ───►   │ 지금 V2까지 적용됨   │
+├── V3__create_orders.sql         │ → V3, V4만 실행하면  │
+└── V4__add_index.sql             │   된다               │
+                                  └──────────────────────┘</pre>
+
+        <h3>flyway_schema_history 테이블</h3>
+        <p>그 기록이 저장되는 곳이 <code>flyway_schema_history</code> 테이블입니다. Flyway가 처음 실행될 때 스스로 만듭니다. 컬럼은 다음과 같습니다.</p>
+
+        <div class="tscroll">
+          <table>
+            <thead>
+              <tr><th>컬럼</th><th>의미</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>installed_rank</code></td><td>적용된 순서. 1부터 증가합니다.</td></tr>
+              <tr><td><code>version</code></td><td>마이그레이션 버전. 반복 실행 마이그레이션은 <code>NULL</code>입니다.</td></tr>
+              <tr><td><code>description</code></td><td>파일 이름에서 뽑아낸 설명.</td></tr>
+              <tr><td><code>type</code></td><td><code>SQL</code>, <code>JDBC</code>, <code>BASELINE</code> 등.</td></tr>
+              <tr><td><code>script</code></td><td>실제 파일 이름.</td></tr>
+              <tr><td><code>checksum</code></td><td>파일 내용의 체크섬. 파일이 바뀌었는지 판별하는 근거입니다.</td></tr>
+              <tr><td><code>installed_by</code></td><td>실행한 DB 계정.</td></tr>
+              <tr><td><code>installed_on</code></td><td>실행 시각.</td></tr>
+              <tr><td><code>execution_time</code></td><td>실행에 걸린 시간(ms). 느린 마이그레이션을 찾을 때 씁니다.</td></tr>
+              <tr><td><code>success</code></td><td>성공 여부.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>운영 중 문제가 생기면 이 테이블부터 봅니다. 평범한 테이블이라 그냥 조회하면 됩니다.</p>
+
+        <pre class="code" data-lang="sql">
+SELECT installed_rank, version, description,
+       success, execution_time, installed_on
+FROM flyway_schema_history
+ORDER BY installed_rank DESC
+LIMIT 10;</pre>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">flyway_schema_history</span></p>
+          <p>이 테이블을 손으로 고치고 싶은 순간이 반드시 옵니다. 그때는 <code>UPDATE</code>나 <code>DELETE</code>를 직접 치지 말고 <code>flyway repair</code>를 쓰세요. 손으로 고치면 <code>checksum</code>과 <code>installed_rank</code>가 어긋나면서, 다음 사람이 원인을 못 찾는 상태가 됩니다.</p>
+        </aside>
+
+        <h2>마이그레이션 파일 규칙</h2>
+        <p>Flyway는 파일 이름으로 모든 것을 판단합니다. 규칙은 <strong>접두사 + 버전 + 구분자 + 설명 + 확장자</strong>입니다.</p>
+
+        <pre class="code" data-lang="text">
+V2__add_phone_to_users.sql
+│ │  │                   └── 확장자 (.sql)
+│ │  └── 설명 (밑줄은 공백으로 표시됨)
+│ └── 구분자 (밑줄 두 개, __)
+└── 접두사 + 버전</pre>
+
+        <p>접두사는 세 종류입니다.</p>
+
+        <div class="tscroll">
+          <table>
+            <thead>
+              <tr><th>접두사</th><th>이름</th><th>언제 실행되나</th><th>예시</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>V</code></td><td>Versioned</td><td>버전 순서대로 딱 한 번</td><td><code>V3__create_orders.sql</code></td></tr>
+              <tr><td><code>R</code></td><td>Repeatable</td><td>내용이 바뀔 때마다, 버전 마이그레이션 이후에</td><td><code>R__user_summary_view.sql</code></td></tr>
+              <tr><td><code>U</code></td><td>Undo</td><td>같은 버전을 되돌릴 때 (Enterprise 전용)</td><td><code>U3__create_orders.sql</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>실무에서 <code>V</code>와 <code>R</code>만 씁니다. <code>U</code>는 유료 에디션 기능인데, 뒤에서 설명하겠지만 유료라서 안 쓰는 것이 아니라 애초에 롤백 전략으로 권하기 어렵습니다.</p>
+
+        <h3>Repeatable은 언제 쓰나</h3>
+        <p><code>R</code>은 <strong>몇 번을 실행해도 결과가 같은 것</strong>에만 씁니다. 뷰, 저장 프로시저, 함수 같은 것들입니다. 이런 대상은 <code>CREATE OR REPLACE</code>로 다시 만들면 그만이라, 변경할 때마다 새 버전 파일을 만들 필요가 없습니다. 파일 하나를 계속 고치면 되고 git diff에 변경 내역이 그대로 남습니다.</p>
+
+        <pre class="code" data-lang="sql" data-file="db/migration/R__active_user_view.sql">
+CREATE OR REPLACE VIEW active_user_view AS
+SELECT u.id, u.email, u.phone, COUNT(o.id) AS order_count
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.deleted_at IS NULL
+GROUP BY u.id, u.email, u.phone;</pre>
+
+        <p>반대로 <code>ALTER TABLE</code>이나 <code>INSERT</code>는 절대 <code>R</code>에 넣으면 안 됩니다. 두 번 실행되면 깨지거나 데이터가 중복됩니다.</p>
+
+        <h3>버전 번호는 어떻게 매기나</h3>
+        <p>두 가지 방식이 있고, 팀 규모가 갈림길입니다.</p>
+        <ul>
+          <li><strong>순차 번호</strong>(<code>V1</code>, <code>V2</code>, <code>V3</code>): 읽기 쉽고 순서가 명확합니다. 대신 두 사람이 동시에 <code>V5</code>를 만들면 merge 시점에 충돌합니다.</li>
+          <li><strong>타임스탬프</strong>(<code>V20260903_1430</code>): 충돌이 사실상 없습니다. 대신 파일 이름이 길고 순서를 눈으로 훑기 어렵습니다.</li>
+        </ul>
+        <p>사람이 서너 명이면 순차 번호로 시작해도 충분합니다. 충돌이 실제로 귀찮아지는 시점에 타임스탬프로 바꾸면 됩니다. 이미 적용된 파일은 그대로 두고 새 파일부터 새 규칙을 쓰면 되므로, 나중에 바꿔도 비용이 크지 않습니다.</p>
+
+        <h2>Spring Boot에 붙이기</h2>
+        <p>의존성 두 줄과 설정 몇 줄이면 됩니다. Flyway 10부터 DB별 지원이 별도 모듈로 분리되었으므로, <code>flyway-core</code>만 넣으면 PostgreSQL이나 MySQL에서 동작하지 않습니다. 여기서 막히는 사람이 많습니다.</p>
+
+        <pre class="code" data-lang="kotlin" data-file="build.gradle.kts">
+dependencies {
+    implementation("org.flywaydb:flyway-core")
+
+    // PostgreSQL을 쓴다면
+    implementation("org.flywaydb:flyway-database-postgresql")
+
+    // MySQL / MariaDB를 쓴다면
+    // implementation("org.flywaydb:flyway-mysql")
+}</pre>
+
+        <p>Spring Boot의 의존성 관리가 버전을 맞춰 주므로 버전은 적지 않습니다. Maven이라면 같은 두 아티팩트를 <code>&lt;dependency&gt;</code>로 추가하면 됩니다.</p>
+
+        <pre class="code" data-lang="yaml" data-file="src/main/resources/application.yml">
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+  jpa:
+    hibernate:
+      ddl-auto: validate</pre>
+
+        <p>각 값의 의미는 다음과 같습니다.</p>
+        <ul>
+          <li><code>locations</code>: 마이그레이션 파일을 찾을 경로입니다. 기본값이 <code>classpath:db/migration</code>이라 사실 생략해도 됩니다. 다만 <strong>이 값을 지정하면 기본값을 덮어씁니다.</strong> 테스트용 경로를 추가하려면 <code>classpath:db/migration</code>도 같이 적어야 합니다.</li>
+          <li><code>validate-on-migrate</code>: 실행 전에 적용된 마이그레이션과 현재 파일이 일치하는지 검사합니다. 기본값이 <code>true</code>이고, <strong>끄지 마세요.</strong> 이것이 꺼져 있으면 파일이 몰래 바뀐 것을 알 방법이 없습니다.</li>
+          <li><code>out-of-order</code>: <code>V5</code>가 이미 적용된 DB에 뒤늦게 <code>V4</code>가 들어왔을 때 실행할지 여부입니다. 기본값 <code>false</code>를 유지하세요. 순서를 건너뛴 스키마는 환경마다 결과가 달라집니다.</li>
+        </ul>
+
+        <p>디렉토리는 이렇게 만듭니다.</p>
+
+        <pre class="code" data-lang="text">
+src/main/resources/
+└── db/
+    └── migration/
+        ├── V1__create_users.sql
+        ├── V2__add_phone_to_users.sql
+        ├── V3__create_orders.sql
+        └── R__active_user_view.sql</pre>
+
+        <p>이제 애플리케이션을 띄우면 Flyway가 시작 시점에 자동으로 실행됩니다. 로그에 적용된 마이그레이션이 찍힙니다.</p>
+
+        <pre class="code" data-lang="text">
+Flyway Community Edition 13.4.0 by Redgate
+Database: jdbc:postgresql://localhost:5432/app (PostgreSQL 16.4)
+Successfully validated 4 migrations (execution time 00:00.031s)
+Creating Schema History table "public"."flyway_schema_history" ...
+Migrating schema "public" to version "1 - create users"
+Migrating schema "public" to version "2 - add phone to users"
+Migrating schema "public" to version "3 - create orders"
+Successfully applied 3 migrations (execution time 00:00.194s)</pre>
+
+        <h2>이미 운영 중인 DB에 도입하기</h2>
+        <p>여기가 실제로 어려운 부분입니다. 지금까지의 설명은 빈 DB를 전제로 했습니다. 하지만 여러분이 Flyway를 도입하려는 이유는 <strong>이미 몇 년째 돌아가는 DB가 있고, 그 스키마를 아무도 통제하지 못하기 때문</strong>일 것입니다.</p>
+        <p>이 DB에 그냥 Flyway를 붙이면 <code>V1__create_users.sql</code>이 실행되면서 <code>table already exists</code>로 실패합니다. 필요한 것은 <strong>baseline</strong>입니다. "여기까지는 이미 되어 있는 것으로 친다"는 선언입니다.</p>
+
+        <h3>1단계. 현재 스키마를 파일로 뽑는다</h3>
+        <p>운영 DB의 현재 스키마를 데이터 없이 덤프합니다.</p>
+
+        <pre class="code" data-lang="bash">
+# PostgreSQL
+pg_dump --schema-only --no-owner --no-privileges \
+  -h prod-db -U app_user app_db > baseline.sql
+
+# MySQL
+mysqldump --no-data --skip-add-drop-table \
+  -h prod-db -u app_user -p app_db > baseline.sql</pre>
+
+        <p>덤프 파일을 열어 정리합니다. <code>SET</code> 구문, 소유자 지정, 주석 등 재현에 필요 없는 것들을 지웁니다. 그리고 이 파일을 <code>V1__baseline.sql</code>이라는 이름으로 <code>db/migration</code>에 넣습니다.</p>
+
+        <h3>2단계. 빈 DB에서 검증한다</h3>
+        <p>이 파일이 정말로 운영과 같은 스키마를 만드는지 확인해야 합니다. 로컬의 빈 DB에 <code>V1__baseline.sql</code>만으로 스키마를 만들고, 애플리케이션을 <code>ddl-auto: validate</code>로 띄웁니다. 뜬다면 엔티티 기준으로는 일치한다는 뜻입니다.</p>
+        <p>더 확실하게 하려면 두 스키마를 덤프해서 <code>diff</code>로 비교합니다.</p>
+
+        <pre class="code" data-lang="bash">
+pg_dump --schema-only --no-owner -h localhost app_db \
+  | grep -v '^--' > local.sql
+diff local.sql baseline.sql</pre>
+
+        <h3>3단계. 운영 DB에 baseline을 찍는다</h3>
+        <p>이제 운영 DB에 "V1은 이미 적용된 것으로 간주하라"고 알려 줍니다. 두 가지 방법이 있습니다.</p>
+
+        <pre class="code" data-lang="yaml" data-file="application-prod.yml">
+spring:
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
+    baseline-description: "existing schema"</pre>
+
+        <p><code>baseline-on-migrate: true</code>는 <strong><code>flyway_schema_history</code> 테이블이 없을 때만</strong> 동작합니다. 테이블이 없으면 테이블을 만들고, <code>baseline-version</code>까지를 적용된 것으로 기록한 뒤, 그 다음 버전부터 실행합니다.</p>
+        <p>CLI를 쓴다면 명시적으로 한 번만 실행하는 쪽이 더 안전합니다.</p>
+
+        <pre class="code" data-lang="bash">
+flyway -baselineVersion="1" \
+       -baselineDescription="existing schema" \
+       baseline</pre>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">application-prod.yml:4</span></p>
+          <p>도입이 끝나면 <code>baseline-on-migrate</code>를 <code>false</code>로 되돌리세요. 이 옵션을 켜 둔 채로 두면, 어떤 사고로 <code>flyway_schema_history</code>가 사라졌을 때 Flyway가 "빈 DB구나" 하고 판단해 조용히 baseline을 다시 찍습니다. 그러면 실제로는 적용되지 않은 마이그레이션들이 적용된 것으로 기록됩니다. 원인을 찾는 데 반나절이 걸립니다.</p>
+        </aside>
+
+        <h3>4단계. 확인한다</h3>
+        <p><code>flyway info</code>는 상태를 표로 보여 줍니다. 도입 직후에는 이런 모습이어야 합니다.</p>
+
+        <pre class="code" data-lang="text">
++-----------+---------+-----------------+----------+------------+----------+
+| Category  | Version | Description     | Type     | Installed  | State    |
++-----------+---------+-----------------+----------+------------+----------+
+|           | 1       | existing schema | BASELINE | 2026-09-03 | Baseline |
+| Versioned | 2       | add phone       | SQL      |            | Pending  |
+| Versioned | 3       | create orders   | SQL      |            | Pending  |
++-----------+---------+-----------------+----------+------------+----------+</pre>
+
+        <p><code>V1</code>이 <code>Baseline</code>이고 그 뒤가 <code>Pending</code>이면 성공입니다. <code>V1</code>이 <code>Pending</code>으로 남아 있다면 baseline이 안 찍힌 것이니, 그 상태로 배포하면 안 됩니다.</p>
+
+        <h2>팀에서 지킬 규칙 네 가지</h2>
+        <p>도구를 붙이는 것보다 규칙을 합의하는 쪽이 어렵습니다. 최소한 이 네 가지는 도입 시점에 정해 두세요.</p>
+
+        <h3>1. 적용된 마이그레이션 파일은 절대 수정하지 않는다</h3>
+        <p>Flyway는 파일 내용의 체크섬을 <code>flyway_schema_history</code>에 저장합니다. 이미 적용된 파일을 고치면 다음 실행에서 검증에 걸립니다.</p>
+
+        <pre class="code" data-lang="text">
+Migration checksum mismatch for migration version 3
+-> Applied to database : 1284725619
+-> Resolved locally    : -905442731
+Either revert the changes to the migration, or run repair
+to update the schema history.</pre>
+
+        <p>이것은 버그가 아니라 Flyway가 제대로 일하고 있다는 신호입니다. "내 로컬에서는 아직 안 돌았으니까 그냥 고쳐도 되겠지"가 사고의 시작입니다. 여러분의 로컬에서는 안 돌았어도 동료의 로컬과 개발 서버에서는 이미 돌았습니다. 오타 하나를 고치더라도 <strong>새 파일을 만드세요.</strong></p>
+        <p>예외는 딱 하나, 아직 어디에도 배포되지 않은 브랜치 안의 파일입니다. 이때는 로컬 DB를 지우고 다시 만들면 됩니다.</p>
+
+        <h3>2. 롤백은 undo가 아니라 다음 마이그레이션으로 한다</h3>
+        <p>Flyway의 <code>U</code> 접두사 undo 마이그레이션은 Enterprise 에디션 기능입니다. 하지만 유료가 아니더라도 실무에서 권하기 어렵습니다. <code>DROP COLUMN</code>을 되돌리는 undo 스크립트는 컬럼을 다시 만들 수는 있어도 <strong>거기 있던 데이터를 되살릴 수는 없기 때문</strong>입니다.</p>
+        <p>현실적인 전략은 앞으로 고치는 것입니다. <code>V7</code>이 잘못됐다면 <code>V7</code>을 되돌리는 대신 <code>V8__fix_v7.sql</code>을 만듭니다. 그리고 애초에 되돌릴 일이 없도록, 파괴적인 변경은 여러 배포에 나눠서 합니다.</p>
+
+        <pre class="code" data-lang="text">
+컬럼 이름을 바꾸고 싶을 때 (한 번에 하면 배포 중 장애)
+
+배포 1: 새 컬럼 추가            V10__add_new_column.sql
+배포 2: 양쪽에 모두 쓰는 코드   (앱 배포만)
+배포 3: 데이터 복사            V11__backfill_new_column.sql
+배포 4: 새 컬럼만 읽는 코드     (앱 배포만)
+배포 5: 옛 컬럼 삭제            V12__drop_old_column.sql</pre>
+
+        <p>귀찮아 보이지만, 각 단계에서 앱의 옛 버전과 새 버전이 동시에 떠 있어도 안전합니다. 무중단 배포를 한다면 이 순서가 필수입니다.</p>
+
+        <h3>3. 버전 충돌은 merge 전에 해결한다</h3>
+        <p>두 브랜치가 각각 <code>V8</code>을 만들었다면, 나중에 merge하는 쪽이 자기 파일을 <code>V9</code>로 이름을 바꿉니다. git은 파일 이름이 다르므로 충돌을 알려 주지 않습니다. <strong>사람이 봐야 합니다.</strong></p>
+        <p>PR 체크리스트에 "새 마이그레이션 파일의 버전이 main과 겹치지 않는가"를 넣거나, CI에서 중복 버전을 검사하는 스크립트를 한 줄 돌리세요.</p>
+
+        <pre class="code" data-lang="bash">
+ls src/main/resources/db/migration/V*.sql \
+  | sed 's#.*/V\([0-9]*\)__.*#\1#' | sort | uniq -d</pre>
+
+        <p>출력이 있으면 중복된 버전이 있다는 뜻이니 CI를 실패시킵니다.</p>
+
+        <h3>4. 마이그레이션도 코드 리뷰 대상이다</h3>
+        <p>SQL 파일은 리뷰에서 자주 그냥 넘어갑니다. 하지만 앱 코드는 버그가 나면 롤백하면 되고, 마이그레이션은 롤백이 안 됩니다. 리뷰에서 최소한 이 세 가지는 봅니다.</p>
+        <ul>
+          <li><strong>이 <code>ALTER TABLE</code>이 테이블을 잠그는가.</strong> 몇 만 행이면 순식간이지만, 수천만 행이면 몇 분에서 몇 시간 동안 쓰기가 막힙니다.</li>
+          <li><strong>지우는 것이 있는가.</strong> <code>DROP</code>과 <code>NOT NULL</code> 추가는 되돌릴 수 없습니다.</li>
+          <li><strong><code>INSERT</code>에 컬럼 이름이 명시되어 있는가.</strong> <code>INSERT INTO t VALUES (...)</code>는 나중에 컬럼이 추가되면 깨집니다.</li>
+        </ul>
+
+        <h2>알아 둘 명령어</h2>
+        <p>Spring Boot에 붙이면 대부분 자동으로 돌지만, 문제가 생겼을 때는 CLI나 Gradle 플러그인으로 직접 쓰게 됩니다.</p>
+
+        <div class="tscroll">
+          <table>
+            <thead>
+              <tr><th>명령어</th><th>하는 일</th><th>언제 쓰나</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>info</code></td><td>각 마이그레이션의 상태를 표로 출력</td><td>가장 먼저 치는 명령어. 상태 파악</td></tr>
+              <tr><td><code>migrate</code></td><td>대기 중인 마이그레이션 실행</td><td>배포. 보통 앱 시작 시 자동</td></tr>
+              <tr><td><code>validate</code></td><td>파일과 기록이 일치하는지 검사</td><td>CI에서 배포 전 검증</td></tr>
+              <tr><td><code>baseline</code></td><td>기존 DB에 시작점 기록</td><td>도입 시점에 한 번</td></tr>
+              <tr><td><code>repair</code></td><td>체크섬 재정렬, 실패 기록 제거</td><td>사고 수습. 남용 금지</td></tr>
+              <tr><td><code>clean</code></td><td>스키마의 모든 객체 삭제</td><td>로컬 초기화 전용</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><code>clean</code>은 스키마의 테이블, 뷰, 함수를 전부 지웁니다. 운영 DB에서 실행하면 그날로 끝입니다. 최근 버전의 Flyway는 이 명령을 기본으로 막아 두었고(<code>cleanDisabled</code> 기본값 <code>true</code>), 쓰려면 명시적으로 풀어야 합니다. <strong>운영 설정에서는 절대 풀지 마세요.</strong> 로컬 초기화가 필요하면 차라리 DB 컨테이너를 지우고 다시 띄우는 편이 안전합니다.</p>
+
+        <h2>실전에서 밟는 함정</h2>
+
+        <h3>MySQL에는 DDL 트랜잭션이 없습니다</h3>
+        <p>PostgreSQL은 대부분의 DDL을 트랜잭션 안에서 처리합니다. 마이그레이션이 중간에 실패하면 그 파일의 변경이 통째로 롤백됩니다.</p>
+        <p>MySQL과 Oracle은 그렇지 않습니다. DDL 하나하나가 암묵적으로 커밋됩니다. 한 파일 안에 <code>ALTER TABLE</code>이 세 개 있고 두 번째에서 실패하면, <strong>첫 번째는 적용된 채 남고 <code>flyway_schema_history</code>에는 실패로 기록됩니다.</strong> DB가 어중간한 상태가 됩니다.</p>
+        <p>대응은 두 가지입니다. 파일 하나에 변경 하나만 담아서 실패 지점을 명확하게 만들고, 실패했을 때는 남은 변경을 손으로 되돌린 뒤 <code>repair</code>로 실패 기록을 지우고 다시 실행합니다.</p>
+
+        <h3>대용량 테이블의 ALTER는 락을 겁니다</h3>
+        <p>스테이징에서 0.2초에 끝난 <code>ALTER TABLE</code>이 운영에서 40분 동안 테이블을 잠그는 일은 흔합니다. 데이터 양이 다르기 때문입니다. 마이그레이션은 <strong>운영과 비슷한 규모의 데이터에서 시간을 재 보고</strong> 배포해야 합니다.</p>
+        <p>규모가 크다면 Flyway 안에서 <code>ALTER</code>를 돌리지 않는 선택지도 있습니다. MySQL이라면 <code>pt-online-schema-change</code>나 <code>gh-ost</code>로 무중단 변경을 하고, Flyway에는 그 결과를 반영하는 기록용 마이그레이션만 남깁니다. PostgreSQL이라면 인덱스는 <code>CREATE INDEX CONCURRENTLY</code>를 씁니다. 다만 이 구문은 트랜잭션 안에서 실행할 수 없으므로 별도 파일로 분리하고 해당 마이그레이션의 트랜잭션을 꺼야 합니다.</p>
+
+        <h3>테스트에서는 마이그레이션을 그대로 씁니다</h3>
+        <p>테스트용으로 <code>ddl-auto: create-drop</code>을 쓰고 싶은 유혹이 있습니다. 빠르니까요. 하지만 그러면 <strong>테스트가 검증하는 스키마와 운영에 배포되는 스키마가 다른 것</strong>이 됩니다. 마이그레이션에 문법 오류가 있어도 테스트는 통과합니다.</p>
+        <p>Testcontainers로 실제 DB를 띄우고 Flyway를 그대로 돌리는 편이 낫습니다. 이렇게 하면 마이그레이션 자체가 매 테스트마다 검증됩니다.</p>
+
+        <pre class="code" data-lang="yaml" data-file="src/test/resources/application.yml">
+spring:
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration
+      - classpath:db/testdata
+  jpa:
+    hibernate:
+      ddl-auto: validate</pre>
+
+        <p>테스트 전용 데이터는 <code>db/testdata</code>에 따로 두고, 운영 설정에서는 이 경로를 넣지 않습니다. 앞서 말한 대로 <code>locations</code>는 기본값을 덮어쓰므로 <code>classpath:db/migration</code>을 반드시 함께 적어야 합니다.</p>
+
+        <h3>여러 인스턴스가 동시에 뜰 때</h3>
+        <p>Kubernetes에서 파드 세 개가 동시에 시작하면 Flyway도 세 번 실행됩니다. Flyway는 DB 락으로 이 상황을 처리하므로 마이그레이션이 중복 실행되지는 않습니다. 한 인스턴스가 실행하는 동안 나머지는 기다립니다.</p>
+        <p>다만 마이그레이션이 오래 걸리면 나머지 파드의 기동이 그만큼 늦어지고, 헬스체크 타임아웃에 걸릴 수 있습니다. 마이그레이션이 무거워지는 시점부터는 앱 시작에서 분리해 배포 파이프라인의 별도 단계(예: Kubernetes Job)로 빼는 것을 고려하세요.</p>
+
+        <h2>Flyway와 Liquibase</h2>
+        <p>같은 문제를 푸는 도구가 하나 더 있습니다. 고르는 기준은 대체로 단순합니다.</p>
+
+        <div class="tscroll">
+          <table>
+            <thead>
+              <tr><th></th><th>Flyway</th><th>Liquibase</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>마이그레이션 작성</td><td>SQL 파일 그대로</td><td>XML/YAML/JSON changelog 또는 SQL</td></tr>
+              <tr><td>학습 비용</td><td>낮음. SQL을 알면 끝</td><td>changelog 문법을 익혀야 함</td></tr>
+              <tr><td>롤백</td><td>Enterprise 전용, 수동 작성</td><td>무료 버전에서 일부 자동 생성</td></tr>
+              <tr><td>DB 이식성</td><td>SQL을 직접 쓰므로 DB에 종속</td><td>추상화 계층이 DB 차이를 흡수</td></tr>
+              <tr><td>라이선스</td><td>Community 무료(Apache 2.0), Enterprise 유료</td><td>Community 무료, Pro 유료</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>DB를 바꿀 계획이 없고 팀이 SQL에 익숙하다면 Flyway가 편합니다. 배우는 데 하루면 충분하고, 마이그레이션 파일이 그냥 SQL이라 DBA와 같은 언어로 대화할 수 있습니다. 여러 DB 엔진을 동시에 지원해야 하거나 롤백 자동화가 요구 사항이라면 Liquibase를 봅니다.</p>
+
+        <aside class="review">
+          <p class="review-head"><b>devgrr</b> 리뷰 코멘트 <span class="hash">도구 선택</span></p>
+          <p>둘 중 무엇을 고르든, 지금 손으로 SQL을 치는 상태보다는 낫습니다. 도구 비교에 일주일을 쓰는 것보다 하루 만에 하나를 골라 도입하는 쪽이 훨씬 이득입니다. 나중에 옮기더라도 그때까지 쌓인 마이그레이션 파일은 그대로 자산으로 남습니다.</p>
+        </aside>
+
+        <h2>도입 순서 정리</h2>
+        <p>다음 주에 실제로 도입한다면 이 순서로 하면 됩니다.</p>
+        <ol>
+          <li><strong>로컬에서 먼저 익힙니다.</strong> 빈 DB에 <code>V1</code>, <code>V2</code>를 만들어 보고 <code>flyway_schema_history</code>를 직접 조회해 봅니다. 여기까지 한 시간이면 됩니다.</li>
+          <li><strong>운영 스키마를 덤프해 <code>V1__baseline.sql</code>을 만듭니다.</strong> 빈 DB에서 재현되는지 <code>diff</code>로 검증합니다. 여기가 가장 오래 걸립니다.</li>
+          <li><strong>개발 환경에 먼저 적용합니다.</strong> baseline을 찍고 <code>flyway info</code>로 상태를 확인합니다.</li>
+          <li><strong>팀 규칙을 문서로 합의합니다.</strong> 앞의 네 가지를 팀 위키나 <code>CONTRIBUTING.md</code>에 적습니다. 도구보다 이쪽이 오래 갑니다.</li>
+          <li><strong>운영에 적용합니다.</strong> 적용 후 <code>baseline-on-migrate</code>를 <code>false</code>로 되돌립니다.</li>
+          <li><strong><code>ddl-auto</code>를 <code>validate</code>로 바꿉니다.</strong> 이제 스키마를 바꾸는 경로는 마이그레이션 파일 하나뿐입니다.</li>
+        </ol>
+
+        <h2>마치며</h2>
+        <p>Flyway가 해 주는 일은 생각보다 소박합니다. SQL 파일을 순서대로 한 번씩 실행하고 기록을 남길 뿐입니다. 마법 같은 것은 없습니다.</p>
+        <p>그런데 이 소박한 규칙이 생기고 나면, DB 스키마가 "누군가 관리하고 있을 것으로 믿는 무언가"에서 "PR에서 리뷰하고 git으로 추적하는 코드"로 바뀝니다. 신규 입사자가 첫날 <code>./gradlew bootRun</code> 한 번으로 최신 스키마를 갖게 되고, 배포 전에 어떤 DDL이 나갈지 미리 볼 수 있게 됩니다.</p>
+        <p>도입하기 가장 좋은 시점은 프로젝트 첫날이고, 그 다음으로 좋은 시점은 오늘입니다. 테이블이 늘어날수록 baseline을 뜨는 일만 어려워집니다.</p>
+
+        <h3>참고 자료</h3>
+        <ul>
+          <li><a href="https://documentation.red-gate.com/flyway">Flyway 공식 문서 (Redgate)</a></li>
+          <li><a href="https://github.com/flyway/flyway">Flyway GitHub</a></li>
+          <li><a href="https://docs.spring.io/spring-boot/how-to/data-initialization.html">Spring Boot: Database Initialization</a></li>
+          <li><a href="https://documentation.red-gate.com/fd/repair-277578892.html">Flyway repair 명령어 문서</a></li>
+        </ul>
+      </div>
+
+      <footer class="post-foot">
+        <a href="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>목록으로</a>
+      </footer>
+    </article>
+
+    <nav class="toc" aria-label="목차"></nav>
+  </main>
+</body>
+</html>

@@ -39,6 +39,21 @@
         <svg class="lanes" aria-hidden="true"></svg>
         <!-- 새 글은 이 목록의 맨 위에 추가한다. 맨 아래 항목이 그래프의 루트다. -->
         <ol class="commits" reversed>
+          <li data-branch="backend" data-slug="flyway-db-migration">
+            <a href="/posts/flyway-db-migration"><span class="title">Flyway 도입 가이드</span></a>
+            <p class="summary">DB 스키마를 손으로 고치는 팀이 Flyway로 넘어가는 과정. 마이그레이션 파일 규칙, Spring Boot 연결, 이미 운영 중인 DB에 baseline 잡기, 팀 규칙과 실전 함정까지 정리합니다.</p>
+            <pre class="snippet" data-lang="yaml" data-file="src/main/resources/application.yml" hidden>
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    out-of-order: false
+  jpa:
+    hibernate:
+      ddl-auto: validate   # 스키마를 바꾸는 건 Flyway 뿐</pre>
+          </li>
           <li data-branch="backend" data-slug="okf-guide">
             <a href="/posts/okf-guide"><span class="title">OKF 도입 가이드</span></a>
             <p class="summary">지식을 서비스가 아니라 파일로 다루는 포맷. 마크다운과 YAML 프론트매터에 출처, 신뢰, 유통기한을 적어두는 OKF v0.2의 규칙과 번들 구조, Attested Computation, 도입 로드맵까지 정리합니다.</p>
