@@ -39,6 +39,23 @@
         <svg class="lanes" aria-hidden="true"></svg>
         <!-- 새 글은 이 목록의 맨 위에 추가한다. 맨 아래 항목이 그래프의 루트다. -->
         <ol class="commits" reversed>
+          <li data-branch="frontend" data-slug="javascript-proxy">
+            <a href="/posts/javascript-proxy"><span class="title">JavaScript Proxy 객체의 힘</span></a>
+            <p class="summary">속성 읽기, 쓰기, in 검사를 실제로 일어나기 전에 가로채는 Proxy. get, set, has 트랩과 유효성 검사, 기본값, 메모이제이션, 로깅 사례를 코드로 봅니다.</p>
+            <pre class="snippet" data-lang="javascript" hidden>
+const user = new Proxy({}, {
+  set(target, property, value) {
+    if (property === 'age' &amp;&amp; typeof value !== 'number') {
+      throw new TypeError('나이는 숫자여야 합니다');
+    }
+    target[property] = value;
+    return true;   // 할당 성공
+  }
+});
+
+user.age = 25;    // 통과
+user.age = '25';  // TypeError</pre>
+          </li>
           <li data-branch="infra" data-slug="git-worktree" data-head>
             <a href="/posts/git-worktree"><span class="title">Git worktree 완벽 가이드</span></a>
             <p class="summary">feature 브랜치 작업 중 main 핫픽스가 터지면 stash 대신 디렉토리를 하나 더 엽니다. 원리, 기본 명령, 실전 시나리오, bare 저장소 패턴까지.</p>
