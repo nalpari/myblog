@@ -81,14 +81,19 @@
         const r = $("a", li).getBoundingClientRect();
         return { li, b: li.dataset.branch, x: laneX[li.dataset.branch] ?? x0, y: r.top + r.height / 2 - gr.top };
       });
-      const root = nodes[nodes.length - 1];
-      const pitch = nodes.length > 1 ? Math.max(40, nodes[nodes.length - 2].y - (nodes[nodes.length - 3] ? nodes[nodes.length - 3].y : 0)) : 100;
-      const fork = Math.min(150, Math.max(70, root.y - (nodes.length > 1 ? nodes[nodes.length - 2].y : 0) + 40));
+      const last = nodes[nodes.length - 1];
+      const rooted = last.b === "main";
+      const above = rooted ? nodes.slice(0, -1) : nodes; // commits above the root
+      const pitch = above.length > 1 ? Math.max(40, above[above.length - 1].y - above[above.length - 2].y) : 100;
+      // no post on main yet: the trunk rises from a virtual root one row below the list
+      const root = rooted ? last : { li: null, b: "main", x: x0, y: last.y + pitch };
+      const mainColor = rooted ? color(last.li) : style.getPropertyValue("--main").trim();
+      const fork = Math.min(150, Math.max(70, root.y - (above.length ? above[above.length - 1].y : 0) + 40));
       const span = Math.max(1, root.y);
       const delayOf = (n, i) => 0.15 + ((root.y - n.y) / span) * 0.9 + (i + 1) * 0.06;
 
       svg.setAttribute("viewBox", `0 0 ${gr.width} ${gr.height}`);
-      let out = `<path class="lane" data-branch="main" d="M${x0} ${root.y} L${x0} 0" pathLength="1" style="--c:${color(root.li)};--d:0s"/>`;
+      let out = `<path class="lane" data-branch="main" d="M${x0} ${root.y} L${x0} 0" pathLength="1" style="--c:${mainColor};--d:0s"/>`;
       tags.forEach((t, i) => {
         const b = t.dataset.branch, x = laneX[b];
         const d = `M${x0} ${root.y} C${x0} ${root.y - fork * 0.55} ${x} ${root.y - fork * 0.45} ${x} ${root.y - fork} L${x} 0`;
@@ -101,7 +106,7 @@
           // the merge: this commit lands on main halfway to the next row up
           const my = n.y - pitch / 2;
           out += `<path class="lane arc" data-branch="${n.b}" d="M${n.x} ${n.y} C${n.x} ${n.y - pitch * 0.3} ${x0} ${my + pitch * 0.2} ${x0} ${my}" pathLength="1" style="--c:${color(n.li)};--d:${(d + 0.12).toFixed(2)}s"/>`;
-          out += `<circle class="node merge" data-branch="main" cx="${x0}" cy="${my}" r="4" style="--c:${color(root.li)};--d:${(d + 0.32).toFixed(2)}s"/>`;
+          out += `<circle class="node merge" data-branch="main" cx="${x0}" cy="${my}" r="4" style="--c:${mainColor};--d:${(d + 0.32).toFixed(2)}s"/>`;
         }
       });
       nodes.forEach((n, i) => {
