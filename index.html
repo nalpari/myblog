@@ -33,6 +33,26 @@
         <svg class="lanes" aria-hidden="true"></svg>
         <!-- 새 글은 이 목록의 맨 위에 추가한다. 맨 아래 항목이 그래프의 루트다. -->
         <ol class="commits" reversed>
+          <li data-branch="backend" data-slug="okf-guide">
+            <a href="/posts/okf-guide"><span class="title">OKF 도입 가이드</span></a>
+            <p class="summary">지식을 서비스가 아니라 파일로 다루는 포맷. 마크다운과 YAML 프론트매터에 출처, 신뢰, 유통기한을 적어두는 OKF v0.2의 규칙과 번들 구조, Attested Computation, 도입 로드맵까지 정리합니다.</p>
+            <pre class="snippet" data-lang="yaml" data-file="computations/revenue-ytd.md" hidden>
+---
+type: Attested Computation
+runtime: bigquery
+parameters:
+  - { name: year, type: integer, required: true }
+executor:
+  resource: skills/run-on-bq.md
+  receipt: [job_id, executed_sql, result]
+attester:
+  resource: attesters/sql_equality.py
+verified:
+  - { by: human:jsmith@acme, at: 2026-07-01T09:00:00Z }
+status: stable
+stale_after: 2026-12-31T00:00:00Z
+---</pre>
+          </li>
           <li data-branch="frontend" data-slug="javascript-proxy">
             <a href="/posts/javascript-proxy"><span class="title">JavaScript Proxy 객체의 힘</span></a>
             <p class="summary">속성 읽기, 쓰기, in 검사를 실제로 일어나기 전에 가로채는 Proxy. get, set, has 트랩과 유효성 검사, 기본값, 메모이제이션, 로깅 사례를 코드로 봅니다.</p>
