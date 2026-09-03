@@ -179,7 +179,7 @@ components:
 
 devgrr is one senior developer's log for juniors, and the site draws itself the way that log looks in a terminal. The home page is `git log --graph`: a main trunk on the far left, four topic lanes forking from the root commit and merging back into it, a title and a hash on every row. The right pane is the checked-out post, HEAD. Every post opens with its ref line: branch chip, hash, date. The scene is a developer's editor at night; dark is the default written in `:root` as the second argument of `light-dark()`, and light is a full sibling theme rather than a fallback. A `dark`/`light` pill in the top bar writes the choice to `html[data-theme]`.
 
-Density is editorial, not dashboard: a 100px row pitch on the log, a 70ch measure on posts, 56px section breaks. Decoration comes only from things git and an editor already print: lanes, nodes, hashes, diff gutters, a filename tab, a review comment. There are no cards, no gradients, no thumbnails, no icon set (one inline chevron), and no shadow on anything in flow.
+Density is editorial, not dashboard: a 100px row pitch on the log, a 70ch measure on posts, 56px section breaks. Decoration comes only from things git and an editor already print: lanes, nodes, hashes, diff gutters, a filename tab, a review comment. There are no cards, no gradients, no thumbnails, no icon set (two inline SVG glyphs: the back chevron and the code panel's copy/check), and no shadow on anything in flow.
 
 Where the direction contract and the build diverged, this file records the build. The ground shipped as #12151b rather than the contract's #0e1218, the home split is two equal columns rather than one-third and two-thirds, and the graph topology became a main trunk with merge arcs by the user's decision during the hero phase.
 
@@ -336,6 +336,15 @@ A two-segment pill on the right of the top bar, injected by site.js: `dark` and 
 - **Rest:** fg-3. **Hover:** fg. **Pressed** (`aria-pressed`): bg-band fill, fg. **Active:** 1px push down.
 - First visit follows `prefers-color-scheme`. A press writes `devgrr:theme` and sets `html[data-theme]`. In-body `<picture>` sources that key off `prefers-color-scheme` are rewritten to match the forced scheme.
 
+### Copy button (post code panels)
+A 28px square on the top right of every code panel in a post body, injected by site.js so the no-JS page stays plain text. Absent from the home preview snippets, and never authored into post HTML.
+- **Shape:** 28px, 5px radius, 1px `--line` border, `--bg-2` fill, a 15px inline SVG in `--fg-3`.
+- **Placement:** `right: 8px`; `top: 6px`, or `top: 2px` on a `[data-file]` panel so it sits inside the 32px filename tab. The anchor is a `.codewrap` wrapper, because `.code` itself scrolls horizontally.
+- **Rest:** `opacity: 0`. **Hover / focus-visible:** opacity 1 over 0.2s. Under `@media (hover: none)` it is always visible, because a touch device would otherwise never reveal it.
+- **Copied:** the glyph swaps to a check and the color to `--add-ink` for 1.5s, then reverts on a timer (not on pointerleave, which never fires on touch). A failure uses `--del-ink` the same way.
+- **Copy payload:** the panel's raw source. For a `diff` panel it is the applied result: removed lines and `@@` headers dropped, the leading `+` stripped.
+- **Accessibility:** the label is a visually hidden `.sr` span (코드 복사 / 복사됨 / 복사 실패) inside a `aria-live="polite"` button, so the icon-only control still announces its state.
+
 ### Navigation
 - **Top bar:** wordmark left, theme switch right.
 - **TOC rail:** built from the post's h2s; sticky at 32px; 14.5px; a 1px left hairline with each link padded 5px 0 5px 14px in fg-3, hover fg, current fg with a fg left rule replacing the hairline. Hidden under 1200px.
@@ -367,7 +376,7 @@ Drawn by site.js from the list DOM; without JS the list is a plain list.
 
 ### Don't:
 - **Don't** add cards, gradients, thumbnails, or a shadow on anything in flow.
-- **Don't** add a third typeface, an icon font, or a glyph set; the only icon is one inline SVG chevron.
+- **Don't** add a third typeface, an icon font, or a glyph set. Two inline SVG glyphs exist and are the whole set: the back chevron and the copy/check on code panels. A third one needs a reason recorded here.
 - **Don't** uppercase or letter-space labels; branch names are lowercase 12px.
 - **Don't** add a branch without a `light-dark()` color variable, a pill, and a lane; the graph reads the pills to place lanes.
 - **Don't** add per-page styles to posts; all CSS lives in assets/style.css.

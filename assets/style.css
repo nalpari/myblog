@@ -334,6 +334,40 @@ code, pre, .hash, .wordmark { font-family: var(--mono); font-variant-ligatures: 
 .code:not(.diff) .ln { grid-template-columns: 30px 1fr; }
 .code:not(.diff) .ln .m { display: none; }
 
+/* copy button: the wrapper is the anchor because .code itself scrolls horizontally */
+.codewrap { position: relative; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.copy {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--bg-2);
+  color: var(--fg-3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.code[data-file] ~ .copy { top: 2px; } /* sit inside the 32px filename tab */
+
+.codewrap:hover .copy, .copy:focus-visible { opacity: 1; }
+@media (hover: none) { .copy { opacity: 1; } } /* touch has no hover; it would never appear */
+
+.copy svg { width: 15px; height: 15px; }
+.copy:hover { color: var(--fg); }
+.copy:active { transform: translateY(1px); }
+.copy.done { color: var(--add-ink); border-color: color-mix(in srgb, var(--add-ink) 45%, var(--line)); }
+.copy.fail { color: var(--del-ink); border-color: color-mix(in srgb, var(--del-ink) 45%, var(--line)); }
+
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-built_in { color: var(--syn-keyword); }
 .hljs-meta, .hljs-attr, .hljs-attribute { color: var(--syn-meta); }
 .hljs-title, .hljs-title.function_, .hljs-title.class_, .hljs-section, .hljs-name { color: var(--syn-title); }

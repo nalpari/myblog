@@ -102,6 +102,60 @@
     pre.dataset.rendered = '1';
   }
 
+  /* ---------- code panels: copy button (post body only, injected so no-JS stays plain text) ---------- */
+
+  // What belongs on the clipboard for a diff is the applied result: drop the removed lines
+  // and the hunk headers, keep context, strip the leading +.
+  function copyText(pre) {
+    const text = pre.textContent.replace(/^\n+/, '').replace(/\s+$/, '');
+    if (!pre.classList.contains('diff')) return text;
+    return text.split('\n')
+      .filter((l) => l[0] !== '-' && !l.startsWith('@@'))
+      .map((l) => (l[0] === '+' ? l.slice(1) : l))
+      .join('\n');
+  }
+
+  const ICON_COPY = '<rect x="2.25" y="5.75" width="8" height="8" rx="1.25"/><path d="M5.75 5.75V3.25a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2.5"/>';
+  const ICON_DONE = '<path d="M3.5 8.25 6.5 11.25 12.5 4.75"/>';
+  const svg = (paths) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
+  function addCopy(pre) {
+    // No clipboard on an insecure origin. A button that cannot work is worse than none.
+    if (!navigator.clipboard) return;
+    const text = copyText(pre);
+    const wrap = document.createElement('div');
+    wrap.className = 'codewrap';
+    pre.replaceWith(wrap);
+    wrap.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'copy';
+    // The label lives in a hidden span, not aria-label, so the live region announces the change.
+    btn.setAttribute('aria-live', 'polite');
+    btn.innerHTML = `${svg(ICON_COPY)}<span class="sr">코드 복사</span>`;
+
+    let timer;
+    const flash = (ok) => {
+      btn.classList.toggle('done', ok);
+      btn.classList.toggle('fail', !ok);
+      btn.innerHTML = `${svg(ok ? ICON_DONE : ICON_COPY)}<span class="sr">${ok ? '복사됨' : '복사 실패'}</span>`;
+      clearTimeout(timer);
+      // A timer, not pointerleave: on touch the pointer never leaves.
+      timer = setTimeout(() => {
+        btn.classList.remove('done', 'fail');
+        btn.innerHTML = `${svg(ICON_COPY)}<span class="sr">코드 복사</span>`;
+      }, 1500);
+    };
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(text).then(() => flash(true), () => flash(false));
+    });
+    wrap.appendChild(btn);
+  }
+
+  // Before renderCode: it replaces the panel's text with numbered line spans, so the raw
+  // source is only readable here.
+  $$('.post .body pre.code').forEach(addCopy);
   $$('pre.code').forEach(renderCode);
 
   /* ---------- home: git log --graph ---------- */
